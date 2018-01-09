@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Threading.Tasks;
 using GLib;
 using Gtk;
+using KanjiSeven.Data;
 
 namespace KanjiSeven.Views
 {
@@ -12,15 +14,17 @@ namespace KanjiSeven.Views
             { Layout = ButtonBoxStyle.Center, Spacing = 10 };
         
         private readonly Button _startButton = new Button { Label = "スタート"};
-        private readonly Button _kanjiButton = new Button { Label = "漢字を登録" };
+        private readonly Button _kotobaButton = new Button { Label = "言葉を登録" };
         private readonly Button _exitButton  = new Button { Label = "終了"};
+        
+        private readonly LocalContext _context = LocalContext.Current;
         
         public MainForm() : base("Kanji Seven")
         {
             Resize(300, 400);
             
             _mainVButtonBox.Add(_startButton);
-            _mainVButtonBox.Add(_kanjiButton);
+            _mainVButtonBox.Add(_kotobaButton);
             _mainVButtonBox.Add(_exitButton);
             
             _mainVerticalBox.PackStart(_mainVButtonBox);
@@ -29,11 +33,13 @@ namespace KanjiSeven.Views
             
             CreateListeners();
             ShowAll();
+
+            Task.Factory.StartNew(() => _context.CreateTables());
         }
 
         private void CreateListeners()
         {
-            _kanjiButton.Clicked += KanjiButtonOnClicked;
+            _kotobaButton.Clicked += KanjiButtonOnClicked;
         }
 
         private void KanjiButtonOnClicked(object sender, EventArgs eventArgs)
