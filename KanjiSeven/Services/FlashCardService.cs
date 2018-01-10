@@ -1,24 +1,31 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using KanjiSeven.Data.Entities;
+using KanjiSeven.Events;
 using KanjiSeven.Exceptions;
 using KanjiSeven.Extensions;
 using KanjiSeven.Models;
 
 namespace KanjiSeven.Services
 {
-    public sealed class FlashCardService
+    public class FlashCardService
     {
         public static FlashCardService Current { get; } = new FlashCardService();
-        public int                     Count => _cardList.Count;
+        public int                     Count     => _cardList.Count;
         public GameState               GameState => _gameState;
+
+        public event EventHandler HintRequested;
         
-        private readonly KotobaService _kotobaService;
-        private readonly IList<Kotoba> _kotobaList;
-        private GameState              _gameState;
-        private List<FlashCard>        _cardList;
-        private int                    _currentIndex;
+        private readonly KotobaService  _kotobaService;
+        private readonly IList<Kotoba>  _kotobaList;
+        private GameState               _gameState;
+        private List<FlashCard>         _cardList;
+        private int                     _currentIndex;
+        private Task                    _hintTask;
+        private CancellationTokenSource _hintCts;
         
         private FlashCardService()
         {
@@ -26,7 +33,7 @@ namespace KanjiSeven.Services
             _gameState     = GameState.NotReady;
             _kotobaList    = _kotobaService.List;
         }
-
+        
         public void Init()
         {
             _currentIndex = 0;
@@ -46,11 +53,26 @@ namespace KanjiSeven.Services
 
             card = _cardList.ElementAt(_currentIndex++);
             card.Number = _currentIndex;
+
+            _hintCts?.Cancel();
+            _hintCts = new CancellationTokenSource();
+            Task.Factory.StartNew(() => RequestHint(_hintCts.Token));
             
             if (_currentIndex == _cardList.Count)
                 _gameState = GameState.Result;
             
             return _currentIndex <= _cardList.Count;
+        }
+
+        private async Task RequestHint(CancellationToken ct)
+        {
+            await Task.Delay(TimeSpan.FromSeconds(ConfigManager.Current.HintSpeed), ct);
+            OnHintRequested(new HintRequestedEventArgs { Kotoba = _cardList.ElementAt(_currentIndex - 1).Kotoba });
+        }
+        
+        protected virtual void OnHintRequested(HintRequestedEventArgs e)
+        {
+            HintRequested?.Invoke(this, e);
         }
     }
 }

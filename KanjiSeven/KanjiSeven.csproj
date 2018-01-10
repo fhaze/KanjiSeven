@@ -66,6 +66,7 @@
     <Compile Include="ConfigManager.cs" />
     <Compile Include="Data\Entities\Kotoba.cs" />
     <Compile Include="Data\LocalContext.cs" />
+    <Compile Include="Events\HintRequestedEventArgs.cs" />
     <Compile Include="Exceptions\ServiceException.cs" />
     <Compile Include="Extensions\ListExtensions.cs" />
     <Compile Include="Models\FlashCard.cs" />

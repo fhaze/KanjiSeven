@@ -37,6 +37,7 @@ namespace KanjiSeven.Views
             _dbDirectoryBrowse.Clicked += DbDirectoryBrowseOnClicked;
 
             table.Attach(_hintScale, 1, 2, 1, 2, AttachOptions.Fill, AttachOptions.Fill, 0, 0);
+            _hintScale.Value = _configuration.HintSpeed;
             
             _mainVerticalBox.PackStart(table, false, false, 0);
             _mainVerticalBox.PackStart(new HSeparator(), false, true, 5);
@@ -60,6 +61,7 @@ namespace KanjiSeven.Views
         private void ConfirmButtonOnClicked(object sender, EventArgs eventArgs)
         {
             _configuration.StorageDir = _dbDirectoryEntry.Text.Trim();
+            _configuration.HintSpeed = Convert.ToInt32(_hintScale.Value);
             ConfigManager.Save(_configuration, false);
             LocalContext.Current.Reload();
             Destroy();
