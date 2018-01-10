@@ -79,8 +79,8 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\KotobaService.cs" />
-    <Compile Include="Views\KanjiEditor.cs" />
-    <Compile Include="Views\KanjiEditorAddKotoba.cs" />
+    <Compile Include="Views\KotobaList.cs" />
+    <Compile Include="Views\KotobaEditor.cs" />
     <Compile Include="Views\MainForm.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -21,7 +21,7 @@ namespace KanjiSeven.Views
         
         public MainForm() : base("Kanji Seven")
         {
-            Resize(300, 400);
+            Resize(250, 175);
             
             _mainVButtonBox.Add(_startButton);
             _mainVButtonBox.Add(_kotobaButton);
@@ -31,20 +31,26 @@ namespace KanjiSeven.Views
             _mainVerticalBox.PackStart(_statusbar, false, true, 0);
             Add(_mainVerticalBox);
             
-            CreateListeners();
+            _kotobaButton.Clicked += KanjiButtonOnClicked;
+            _exitButton.Clicked += ExitButtonOnClicked;
             ShowAll();
 
             Task.Factory.StartNew(() => _context.CreateTables());
         }
 
-        private void CreateListeners()
+        private void ExitButtonOnClicked(object sender, EventArgs eventArgs)
         {
-            _kotobaButton.Clicked += KanjiButtonOnClicked;
+            Application.Quit();
         }
 
         private void KanjiButtonOnClicked(object sender, EventArgs eventArgs)
         {
-            new KanjiEditor(this);
+            new KotobaList(this);
+        }
+
+        protected override void OnDestroyed()
+        {
+            Application.Quit();
         }
     }
 }

@@ -10,7 +10,7 @@ using Window = Gtk.Window;
 
 namespace KanjiSeven.Views
 {
-    public class KanjiEditor : Window
+    public class KotobaList : Window
     {
         private readonly KotobaService   _kotobaService      = KotobaService.Current;
         private readonly VBox            _mainVerticalBox    = new VBox();
@@ -24,14 +24,14 @@ namespace KanjiSeven.Views
         
         private ListStore Store { set; get; } = new ListStore(typeof(string), typeof(string), typeof(string));
 
-        public KanjiEditor(Window parent) : base("漢字を登録")
+        public KotobaList(Window parent) : base("言葉を登録")
         {
             SetSizeRequest(800, 600);
             Modal = true;
             TransientFor = parent;
             SetPosition(WindowPosition.CenterOnParent);
 
-            var hbox = new HBox();
+            var hbox = new HBox { BorderWidth = 5 };
             hbox.PackStart(new Label("フィルタ"), false, true, 5);
             hbox.PackStart(_filterEntry, true, true, 0);
             hbox.PackStart(_cleanButton, false, true, 5);
@@ -39,7 +39,7 @@ namespace KanjiSeven.Views
             _cleanButton.Clicked += CleanButtonOnClicked;
             _mainVerticalBox.PackStart(hbox, false, true, 5);
 
-            var hbbox = new HButtonBox {Layout = ButtonBoxStyle.Start, Spacing = 5};
+            var hbbox = new HButtonBox { BorderWidth = 5, Layout = ButtonBoxStyle.Start, Spacing = 5};
             hbbox.PackStart(_addKotobaButton);
             hbbox.PackStart(_editKotobaButton);
             hbbox.PackStart(_deleteKotobaButton);
@@ -64,7 +64,7 @@ namespace KanjiSeven.Views
 
         private void AddKotobaButtonOnClicked(object sender, EventArgs eventArgs)
         {
-            new KanjiEditorAddKotoba(this);
+            new KotobaEditor(this);
         }
 
         private void FilterEntryOnChanged(object sender, EventArgs eventArgs)
