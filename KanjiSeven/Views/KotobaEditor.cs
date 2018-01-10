@@ -1,7 +1,9 @@
 ﻿using System;
+using Gdk;
 using Gtk;
 using KanjiSeven.Data.Entities;
 using KanjiSeven.Services;
+using Key = Gdk.Key;
 using Window = Gtk.Window;
 
 namespace KanjiSeven.Views
@@ -11,26 +13,34 @@ namespace KanjiSeven.Views
         private readonly VBox   _mainVerticalBox = new VBox { BorderWidth = 10};
         private readonly Entry  _idEntry         = new Entry{ WidthRequest = 50, IsEditable = false };
         private readonly Entry  _kotobaEntry     = new Entry();
-        private readonly Entry  _hiraganaEntry   = new Entry();
+        private readonly Entry  _furiganaEntry   = new Entry();
         private readonly Entry  _honyakuEntry    = new Entry();
         private readonly Button _confirmButton   = new Button {Label = "OK"};
-        private readonly Button _cancelButton    = new Button {Label = "キャンセル"};
+        private readonly Button _closeButton     = new Button {Label = "閉じる" };
 
+        private readonly Window        _parentWindow;
         private readonly KotobaService _kotobaService = KotobaService.Current;
         private readonly Kotoba        _kotoba;
 
         public KotobaEditor(Window parent, int id) : this(parent)
         {
             _kotoba = _kotobaService.Get(id);
+            _idEntry.Text = _kotoba.Id.ToString();
+            _kotobaEntry.Text = _kotoba.Namae;
+            _furiganaEntry.Text = _kotoba.Furigana;
+            _honyakuEntry.Text = _kotoba.Honyaku;
         }
         
         public KotobaEditor(Window parent) : base("言葉を編集")
         {
+            _parentWindow = parent;
             WidthRequest = 400;
             Modal = true;
-            TransientFor = parent;
+            TransientFor = _parentWindow;
             Resizable = true;
             SetPosition(WindowPosition.CenterOnParent);
+            
+            KeyReleaseEvent += OnKeyReleaseEvent;
             
             var table = new Table(3, 2, false)
             {
@@ -50,16 +60,21 @@ namespace KanjiSeven.Views
             hbox.PackStart(_idEntry, false, false, 0);
             table.Attach(hbox, 1, 2, 0, 1, AttachOptions.Fill, AttachOptions.Fill, 0, 0);
             table.Attach(_kotobaEntry, 1, 2, 1, 2);
-            table.Attach(_hiraganaEntry, 1, 2, 2, 3);
+            table.Attach(_furiganaEntry, 1, 2, 2, 3);
             table.Attach(_honyakuEntry, 1, 2, 3, 4);
+
+            _kotobaEntry.Changed += EntryOnChanged;
+            _furiganaEntry.Changed += EntryOnChanged;
+            _honyakuEntry.Changed += EntryOnChanged;
             
             _mainVerticalBox.PackStart(table, false, false, 0);
             _mainVerticalBox.PackStart(new HSeparator(), false, true, 5);
             
-            var hbbox = new HButtonBox {Layout = ButtonBoxStyle.Spread};
+            var hbbox = new HButtonBox {Layout = ButtonBoxStyle.End, Spacing = 10};
+            _closeButton.Clicked += CloseButtonOnClicked;
             _confirmButton.Clicked += ConfirmButtonOnClicked;
             hbbox.PackStart(_confirmButton);
-            hbbox.PackStart(_cancelButton);
+            hbbox.PackStart(_closeButton);
 
             _mainVerticalBox.PackStart(hbbox, false, false, 0);
             
@@ -67,11 +82,49 @@ namespace KanjiSeven.Views
             _kotobaEntry.GrabFocus();
             
             ShowAll();
+            EntryOnChanged(null, null);
         }
+
+        private void OnKeyReleaseEvent(object o, KeyReleaseEventArgs args)
+        {
+            if (args.Event.Key == Key.Escape)
+                Destroy();
+        }
+
+        private void CloseButtonOnClicked(object sender, EventArgs eventArgs)
+        {
+            Destroy();
+        }
+
+        private void EntryOnChanged(object sender, EventArgs eventArgs)
+        {
+            if (string.IsNullOrEmpty(_kotobaEntry.Text.Trim()) ||
+                string.IsNullOrEmpty(_furiganaEntry.Text.Trim()) ||
+                string.IsNullOrEmpty(_honyakuEntry.Text.Trim()))
+                _confirmButton.Sensitive = false;
+            else
+                _confirmButton.Sensitive = true;
+        }
+
 
         private void ConfirmButtonOnClicked(object sender, EventArgs eventArgs)
         {
-            
+            if (string.IsNullOrEmpty(_idEntry.Text))
+                _kotobaService.Insert(_kotobaEntry.Text.Trim(), _furiganaEntry.Text.Trim(), _honyakuEntry.Text.Trim());
+            else
+            {
+                _kotoba.Namae = _kotobaEntry.Text.Trim();
+                _kotoba.Furigana = _furiganaEntry.Text.Trim();
+                _kotoba.Honyaku = _honyakuEntry.Text.Trim();
+                _kotobaService.Update(_kotoba);
+            }
+
+            if (_parentWindow.GetType() == typeof(KotobaList))
+            {
+                var list = _parentWindow as KotobaList;
+                list.RefreshList();
+            }
+            Destroy();
         }
     }
 }

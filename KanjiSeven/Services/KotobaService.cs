@@ -24,9 +24,20 @@ namespace KanjiSeven.Services
 
         public Kotoba Insert(string namae, string furigana, string honyaku)
         {
-            var kanji = new Kotoba {Namae = namae, Furigana = furigana, Honyaku = honyaku};
-            _context.Conn.Insert(kanji);
-            return kanji;
+            var kotoba = new Kotoba {Namae = namae, Furigana = furigana, Honyaku = honyaku};
+            _context.Conn.Insert(kotoba);
+            return kotoba;
+        }
+
+        public Kotoba Update(Kotoba kotoba)
+        {
+            _context.Conn.Update(kotoba);
+            return kotoba;
+        }
+
+        public void Delete(int id)
+        {
+            _context.Conn.Delete<Kotoba>(id);
         }
     }
 }

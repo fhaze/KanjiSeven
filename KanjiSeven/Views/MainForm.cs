@@ -20,7 +20,7 @@ namespace KanjiSeven.Views
         private readonly LocalContext _context = LocalContext.Current;
         
         public MainForm() : base("Kanji Seven")
-        {
+        {            
             Resize(250, 175);
             
             _mainVButtonBox.Add(_startButton);
