@@ -13,29 +13,42 @@ namespace KanjiSeven.Views
         private readonly VButtonBox _mainVButtonBox  = new VButtonBox
             { Layout = ButtonBoxStyle.Center, Spacing = 10 };
         
-        private readonly Button _startButton = new Button { Label = "スタート"};
+        private readonly Button _startButton  = new Button { Label = "ゲーム"};
         private readonly Button _kotobaButton = new Button { Label = "言葉を登録" };
-        private readonly Button _exitButton  = new Button { Label = "終了"};
+        private readonly Button _configButton = new Button { Label = "設定" };
+        private readonly Button _exitButton   = new Button { Label = "終了"};
         
         private readonly LocalContext _context = LocalContext.Current;
         
         public MainForm() : base("Kanji Seven")
         {            
+            GrabFocus();
             Resize(250, 175);
             
             _mainVButtonBox.Add(_startButton);
             _mainVButtonBox.Add(_kotobaButton);
+            _mainVButtonBox.Add(_configButton);
             _mainVButtonBox.Add(_exitButton);
             
             _mainVerticalBox.PackStart(_mainVButtonBox);
             _mainVerticalBox.PackStart(_statusbar, false, true, 0);
             Add(_mainVerticalBox);
             
+            _startButton.Clicked += StartButtonOnClicked;
             _kotobaButton.Clicked += KanjiButtonOnClicked;
+            _configButton.Clicked += ConfigButtonOnClicked;
             _exitButton.Clicked += ExitButtonOnClicked;
             ShowAll();
+        }
 
-            Task.Factory.StartNew(() => _context.CreateTables());
+        private void StartButtonOnClicked(object sender, EventArgs eventArgs)
+        {
+            new FlashCardForm(this);
+        }
+
+        private void ConfigButtonOnClicked(object sender, EventArgs eventArgs)
+        {
+            new ConfigForm(this);
         }
 
         private void ExitButtonOnClicked(object sender, EventArgs eventArgs)
@@ -50,6 +63,7 @@ namespace KanjiSeven.Views
 
         protected override void OnDestroyed()
         {
+            LocalContext.Current.Conn?.Close();
             Application.Quit();
         }
     }

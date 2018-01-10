@@ -9,6 +9,7 @@ namespace KanjiSeven.Data.Entities
         
         public string Namae { get; set; }
         public string Furigana { get; set; }
+        public string Romaji { get; set; }
         public string Honyaku { get; set; }
     }
 }

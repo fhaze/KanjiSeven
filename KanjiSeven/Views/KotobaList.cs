@@ -8,22 +8,24 @@ using Gtk;
 using KanjiSeven.Data;
 using KanjiSeven.Data.Entities;
 using KanjiSeven.Services;
+using KanjiSeven.Widgets;
 using Key = Gdk.Key;
 using Window = Gtk.Window;
 
 namespace KanjiSeven.Views
 {
-    public class KotobaList : Window
+    public class KotobaList : BaseWindow
     {
         private readonly KotobaService   _kotobaService      = KotobaService.Current;
         private readonly VBox            _mainVerticalBox    = new VBox();
-        private readonly TreeView        _kotobaView          = new TreeView();
-        private readonly Entry           _filterEntry        = new Entry() { WidthRequest = 250 };
+        private readonly TreeView        _kotobaView         = new TreeView();
+        private readonly Entry           _filterEntry        = new Entry { WidthRequest = 250 };
         private readonly Button          _cleanButton        = new Button { Label = "クリーン", WidthRequest = 80};
         private readonly Button          _addKotobaButton    = new Button { Label = "新しい言葉"};
         private readonly Button          _editKotobaButton   = new Button { Label = "編集"};
         private readonly Button          _deleteKotobaButton = new Button { Label = "削除"};
         private TreeModelFilter _filter;
+        private TreeModelSort   _sort;
         
         private ListStore Store { set; get; }
 
@@ -57,10 +59,18 @@ namespace KanjiSeven.Views
             _kotobaView.Events = EventMask.ButtonPressMask;
             _kotobaView.ButtonPressEvent += KotobaViewOnButtonPressEvent;
             _kotobaView.AppendColumn("ID", new CellRendererText(), "text", 0);
-            _kotobaView.AppendColumn("言葉", new CellRendererText { Size = 24 }, "text", 1);
+            _kotobaView.AppendColumn("言葉", new CellRendererText{ Scale = 1.5 }, "text", 1);
             _kotobaView.AppendColumn("ふりがな", new CellRendererText(), "text", 2);
-            _kotobaView.AppendColumn("翻訳", new CellRendererText(), "text", 3);
+            _kotobaView.AppendColumn("ローマ字", new CellRendererText(), "text", 3);
+            _kotobaView.AppendColumn("翻訳", new CellRendererText(), "text", 4);
 
+            var i = 0;
+            foreach (var kotobaViewColumn in _kotobaView.Columns)
+            {
+                kotobaViewColumn.SortColumnId = i++;
+                kotobaViewColumn.Clickable = true;
+            }
+            
             RefreshList();                
             
             _mainVerticalBox.PackStart(_kotobaView);
@@ -74,6 +84,7 @@ namespace KanjiSeven.Views
             DeleteSelected();
         }
 
+        [ConnectBefore]
         private void OnKeyReleaseEvent(object o, KeyReleaseEventArgs args)
         {
             switch (args.Event.Key)
@@ -83,9 +94,6 @@ namespace KanjiSeven.Views
                     break;
                 case Key.Delete:
                     DeleteSelected();
-                    break;
-                case Key.Escape:
-                    Destroy();
                     break;
             }
         }
@@ -141,13 +149,14 @@ namespace KanjiSeven.Views
         
         public void RefreshList()
         {
-            Store = new ListStore(typeof(int), typeof(string), typeof(string), typeof(string));
+            Store = new ListStore(typeof(int), typeof(string), typeof(string), typeof(string), typeof(string));
 
             foreach (var kotoba in _kotobaService.List)
-                Store.AppendValues(kotoba.Id, kotoba.Namae, kotoba.Furigana, kotoba.Honyaku);
+                Store.AppendValues(kotoba.Id, kotoba.Namae, kotoba.Furigana, kotoba.Romaji, kotoba.Honyaku);
             
             _filter = new TreeModelFilter(Store, null) { VisibleFunc = FilterKanji };
-            _kotobaView.Model = _filter;
+            _sort = new TreeModelSort(_filter);
+            _kotobaView.Model = _sort;
         }
         
         private void AddKotobaButtonOnClicked(object sender, EventArgs eventArgs)
@@ -170,7 +179,8 @@ namespace KanjiSeven.Views
             var id = (int)model.GetValue(iter, 0);
             var kotoba = model.GetValue(iter, 1).ToString();
             var furigana = model.GetValue(iter, 2).ToString();
-            var honyaku = model.GetValue(iter, 3).ToString();
+            var romaji = model.GetValue(iter, 3).ToString();
+            var honyaku = model.GetValue(iter, 4).ToString();
 
             if (_filterEntry.Text == string.Empty)
                 return true;
@@ -181,6 +191,7 @@ namespace KanjiSeven.Views
             return
                 kotoba.IndexOf(_filterEntry.Text, StringComparison.Ordinal) > -1 ||
                 furigana.IndexOf(_filterEntry.Text, StringComparison.Ordinal) > -1 ||
+                romaji.IndexOf(_filterEntry.Text, StringComparison.Ordinal) > -1 ||
                 honyaku.IndexOf(_filterEntry.Text, StringComparison.Ordinal) > -1;
         }
     }

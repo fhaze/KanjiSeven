@@ -15,16 +15,16 @@ namespace KanjiSeven.Services
             _context = LocalContext.Current;
         }
 
-        public IEnumerable<Kotoba> List => _context.Conn.Table<Kotoba>().ToList();
+        public IList<Kotoba> List => _context.Conn.Table<Kotoba>().ToList();
 
         public Kotoba Get(int id)
         {
             return _context.Conn.Get<Kotoba>(id);
         }
 
-        public Kotoba Insert(string namae, string furigana, string honyaku)
+        public Kotoba Insert(string namae, string furigana, string romaji, string honyaku)
         {
-            var kotoba = new Kotoba {Namae = namae, Furigana = furigana, Honyaku = honyaku};
+            var kotoba = new Kotoba {Namae = namae, Furigana = furigana, Romaji = romaji, Honyaku = honyaku};
             _context.Conn.Insert(kotoba);
             return kotoba;
         }
