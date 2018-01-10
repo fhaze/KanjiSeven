@@ -11,6 +11,7 @@ namespace KanjiSeven.Services
     public sealed class FlashCardService
     {
         public static FlashCardService Current { get; } = new FlashCardService();
+        public int                     Count => _cardList.Count;
         public GameState               GameState => _gameState;
         
         private readonly KotobaService _kotobaService;
@@ -22,8 +23,8 @@ namespace KanjiSeven.Services
         private FlashCardService()
         {
             _kotobaService = KotobaService.Current;
-            _gameState = GameState.NotReady;
-            _kotobaList = _kotobaService.List;
+            _gameState     = GameState.NotReady;
+            _kotobaList    = _kotobaService.List;
         }
 
         public void Init()

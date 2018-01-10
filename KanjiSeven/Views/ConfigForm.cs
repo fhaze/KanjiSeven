@@ -15,6 +15,7 @@ namespace KanjiSeven.Views
         private readonly Button _dbDirectoryBrowse = new Button { Label = "ブラウズ" };
         private readonly Button _confirmButton     = new Button { Label = "OK" };
         private readonly Button _cancelButton      = new Button { Label = "キャンセル" };
+        private readonly HScale _hintScale         = new HScale(0, 10, 5);
 
         private readonly Configuration _configuration = ConfigManager.Current; 
         
@@ -24,8 +25,9 @@ namespace KanjiSeven.Views
             TransientFor = parent;
             SetPosition(WindowPosition.CenterOnParent);
             
-            var table = new Table(2, 2, false);
+            var table = new Table(3, 2, false);
             table.Attach(new Label("DBファイラー"), 0, 1, 0, 1, AttachOptions.Shrink, AttachOptions.Shrink, 0, 0);
+            table.Attach(new Label("ヒントスピード"), 0, 1, 1, 2, AttachOptions.Shrink, AttachOptions.Shrink, 0, 0);
             
             var hbox = new HBox();
             hbox.PackStart(_dbDirectoryEntry, true, true, 0);
@@ -33,6 +35,8 @@ namespace KanjiSeven.Views
             table.Attach(hbox, 1, 2, 0, 1, AttachOptions.Fill, AttachOptions.Fill, 0, 0);
             _dbDirectoryEntry.Text = _configuration.StorageDir;
             _dbDirectoryBrowse.Clicked += DbDirectoryBrowseOnClicked;
+
+            table.Attach(_hintScale, 1, 2, 1, 2, AttachOptions.Fill, AttachOptions.Fill, 0, 0);
             
             _mainVerticalBox.PackStart(table, false, false, 0);
             _mainVerticalBox.PackStart(new HSeparator(), false, true, 5);

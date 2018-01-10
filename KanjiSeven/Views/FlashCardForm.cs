@@ -17,7 +17,7 @@ namespace KanjiSeven.Views
         private readonly Label  _cardLabelHonyaku  = new Label("翻訳");
         private readonly Button _startButton       = new Button { Label = "始めよ！" };
         private readonly Button _nextButton        = new Button { Label = "次へ", Sensitive = false };
-        private readonly Button _backButton        = new Button { Label = "やめろ" };
+        private readonly Button _backButton        = new Button { Label = "やめろ" };  
         
         private readonly FlashCardService _flashCardService = FlashCardService.Current;
         
@@ -76,7 +76,7 @@ namespace KanjiSeven.Views
         {
             if (_flashCardService.NextFlashCard(out var card))
             {
-                _description.Text = card.Number.ToString();
+                _description.Text = $"{card.Number}/{_flashCardService.Count}";
                 _cardLabelKotoba.Text = card.Kotoba.Namae;
                 _cardLabelFurigana.Text = card.Kotoba.Furigana;
                 _cardLabelRomaji.Text = card.Kotoba.Romaji;

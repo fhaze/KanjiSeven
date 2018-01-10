@@ -22,7 +22,6 @@ namespace KanjiSeven.Views
         
         public MainForm() : base("Kanji Seven")
         {            
-            GrabFocus();
             Resize(250, 175);
             
             _mainVButtonBox.Add(_startButton);
@@ -38,7 +37,9 @@ namespace KanjiSeven.Views
             _kotobaButton.Clicked += KanjiButtonOnClicked;
             _configButton.Clicked += ConfigButtonOnClicked;
             _exitButton.Clicked += ExitButtonOnClicked;
+            
             ShowAll();
+            GrabFocus();
         }
 
         private void StartButtonOnClicked(object sender, EventArgs eventArgs)

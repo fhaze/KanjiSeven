@@ -7,7 +7,7 @@ namespace KanjiSeven.Services
 {
     public sealed class KotobaService
     {
-        public static KotobaService Current { get; } = new KotobaService();
+        public static KotobaService   Current { get; } = new KotobaService();
         private readonly LocalContext _context;
 
         private KotobaService()
