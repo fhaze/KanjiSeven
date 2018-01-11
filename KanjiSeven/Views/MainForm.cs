@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Drawing;
-using System.Drawing.Imaging;
-using System.IO;
-using Gdk;
 using GLib;
 using Gtk;
 using KanjiSeven.Data;
@@ -15,7 +11,6 @@ namespace KanjiSeven.Views
     {
         private readonly Table       _table           = new Table(1, 3, true);
         private readonly VBox        _mainVerticalBox = new VBox();
-        private readonly Gtk.Image   _background      = new Gtk.Image();
         private readonly Statusbar   _statusbar       = new Statusbar();
         private readonly VButtonBox  _mainVButtonBox  = new VButtonBox
             { Layout = ButtonBoxStyle.Center, Spacing = 10 };
