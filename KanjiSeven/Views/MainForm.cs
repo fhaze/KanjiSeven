@@ -18,8 +18,6 @@ namespace KanjiSeven.Views
         private readonly Button _configButton = new Button { Label = "設定" };
         private readonly Button _exitButton   = new Button { Label = "終了"};
         
-        private readonly LocalContext _context = LocalContext.Current;
-        
         public MainForm() : base("Kanji Seven")
         {            
             Resize(250, 175);

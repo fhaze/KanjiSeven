@@ -16,6 +16,8 @@ namespace KanjiSeven.Services
         public static FlashCardService Current { get; } = new FlashCardService();
         public int                     Count     => _cardList.Count;
         public GameState               GameState => _gameState;
+        public GameStyle               GameStyle { get; set; }
+        public IEnumerable<Kotoba>     GuessKotobaList { get; private set; }
 
         public event EventHandler HintRequested;
         
@@ -56,7 +58,17 @@ namespace KanjiSeven.Services
 
             _hintCts?.Cancel();
             _hintCts = new CancellationTokenSource();
-            Task.Factory.StartNew(() => RequestHint(_hintCts.Token));
+            
+            if (ConfigManager.Current.ShowHint)
+                Task.Factory.StartNew(() => RequestHint(_hintCts.Token));
+
+            if (GameStyle == GameStyle.GuessMode)
+            {
+                _kotobaList.Shuffle();
+                _kotobaList.Remove(card.Kotoba);
+                
+                GuessKotobaList = _kotobaList;
+            }
             
             if (_currentIndex == _cardList.Count)
                 _gameState = GameState.Result;
