@@ -14,7 +14,7 @@ namespace KanjiSeven.Views
     {
         private readonly VBox        _mainVerticalBox   = new VBox { BorderWidth = 10 };
         private readonly Entry       _dbDirectoryEntry  = new Entry { WidthRequest = 300 };
-        private readonly Button      _dbDirectoryBrowse = new Button { Label = "ブラウズ" };
+        private readonly Button      _dbDirectoryBrowse = new Button { Label = "ブラウズ", WidthRequest = 60};
         private readonly Button      _confirmButton     = new Button { Label = "OK" };
         private readonly Button      _cancelButton      = new Button { Label = "キャンセル" };
         private readonly RadioButton _simpleRadio;
