@@ -36,6 +36,7 @@ namespace KanjiSeven.Services
         private int                     _skipNumber;
         private int                     _correctNumber;
         private bool                    _currentGuessed;
+        private bool                    _currentWrong;
         private FlashCard               _currentCard;
         private Task                    _hintTask;
         private CancellationTokenSource _hintCts;
@@ -85,6 +86,7 @@ namespace KanjiSeven.Services
             card.Number = _currentIndex;
             _currentCard = card;
             _currentGuessed = false;
+            _currentWrong = false;
             
             _hintCts?.Cancel();
             _hintCts = new CancellationTokenSource();
@@ -94,6 +96,8 @@ namespace KanjiSeven.Services
 
             if (_gameMode == GameMode.GuessMode)
             {
+                _kotobaService.Mark(_currentCard.Kotoba, Mark.Seen);
+                
                 var tmpKotobaList = new List<Kotoba>(_kotobaList);
                 tmpKotobaList.Shuffle();
                 tmpKotobaList.Remove(card.Kotoba);
@@ -103,7 +107,7 @@ namespace KanjiSeven.Services
 
                 for (var i = 0; i < NumberOfCards; i++)
                     guessList.Add(i == correctIndex ? card.Kotoba : tmpKotobaList.ElementAt(i));
-
+                
                 GuessKotobaList = guessList;
             }
             return true;
@@ -117,10 +121,16 @@ namespace KanjiSeven.Services
             _tryNumber++;
             if (namae == _currentCard.Kotoba.Honyaku)
             {
+                if (_currentWrong) return true;
+                
+                _kotobaService.Mark(_currentCard.Kotoba, Mark.Answer);
                 _currentGuessed = true;
                 _correctNumber++;
                 return true;
             }
+
+            _currentWrong = true;
+            _kotobaService.Mark(_currentCard.Kotoba, Mark.Wrong);
             return false;
         }
         

@@ -14,7 +14,7 @@ namespace KanjiSeven
             {
                 StorageDir = "KanjiSeven.db3",
                 ShowHint = true,
-                HintSpeed = 3,
+                HintSpeed = 10,
                 GameMode = GameMode.Simple
             }, true);
         }

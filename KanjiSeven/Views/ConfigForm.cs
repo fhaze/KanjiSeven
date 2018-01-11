@@ -21,7 +21,7 @@ namespace KanjiSeven.Views
         private readonly RadioButton _guessRadio;
         private readonly RadioButton _inputRadio;
         private readonly CheckButton _showHint          = new CheckButton { Label = "ヒントを見せて" };
-        private readonly HScale      _hintScale         = new HScale(0, 10, 1);
+        private readonly HScale      _hintScale         = new HScale(0, 20, 1);
 
         private readonly Configuration _configuration = ConfigManager.Current; 
         

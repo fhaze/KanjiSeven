@@ -21,6 +21,31 @@ namespace KanjiSeven.Services
         {
             return _context.Conn.Get<Kotoba>(id);
         }
+        
+        public void GetAndIncrementSeen(int id)
+        {
+            var kotoba = _context.Conn.Get<Kotoba>(id);
+            kotoba.Seen += 1;
+            Update(kotoba);
+        }
+        
+        public void Mark(Kotoba kotoba, Mark mark)
+        {
+            switch (mark)
+            {
+                case Services.Mark.Answer:
+                    kotoba.Answer++;
+                    break;
+                case Services.Mark.Wrong:
+                    kotoba.Wrong++;
+                    break;
+                case Services.Mark.Seen:
+                    kotoba.Seen++;
+                    break;
+            }
+
+            _context.Conn.Update(kotoba);
+        }
 
         public Kotoba Insert(string namae, string furigana, string romaji, string honyaku)
         {
@@ -29,15 +54,21 @@ namespace KanjiSeven.Services
             return kotoba;
         }
 
-        public Kotoba Update(Kotoba kotoba)
+        public void Update(Kotoba kotoba)
         {
             _context.Conn.Update(kotoba);
-            return kotoba;
         }
 
         public void Delete(int id)
         {
             _context.Conn.Delete<Kotoba>(id);
         }
+    }
+
+    public enum Mark
+    {
+        Seen,
+        Answer,
+        Wrong
     }
 }

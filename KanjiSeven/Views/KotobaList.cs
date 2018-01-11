@@ -18,6 +18,7 @@ namespace KanjiSeven.Views
     {
         private readonly KotobaService   _kotobaService      = KotobaService.Current;
         private readonly VBox            _mainVerticalBox    = new VBox();
+        private readonly ScrolledWindow  _kotobaScroll       = new ScrolledWindow();
         private readonly TreeView        _kotobaView         = new TreeView();
         private readonly Entry           _filterEntry        = new Entry { WidthRequest = 250 };
         private readonly Button          _cleanButton        = new Button { Label = "クリーン", WidthRequest = 80};
@@ -63,6 +64,10 @@ namespace KanjiSeven.Views
             _kotobaView.AppendColumn("ふりがな", new CellRendererText(), "text", 2);
             _kotobaView.AppendColumn("ローマ字", new CellRendererText(), "text", 3);
             _kotobaView.AppendColumn("翻訳", new CellRendererText(), "text", 4);
+            _kotobaView.AppendColumn("見た", new CellRendererText(), "text", 5);
+            _kotobaView.AppendColumn("正解", new CellRendererText(), "text", 6);
+            _kotobaView.AppendColumn("間違った答え", new CellRendererText(), "text", 7);
+            _kotobaView.AppendColumn("正解率", new CellRendererText(), "text", 8);
 
             var i = 0;
             foreach (var kotobaViewColumn in _kotobaView.Columns)
@@ -73,7 +78,8 @@ namespace KanjiSeven.Views
             
             RefreshList();                
             
-            _mainVerticalBox.PackStart(_kotobaView);
+            _kotobaScroll.Add(_kotobaView);
+            _mainVerticalBox.PackStart(_kotobaScroll);
             Add(_mainVerticalBox);
             
             ShowAll();
@@ -149,10 +155,12 @@ namespace KanjiSeven.Views
         
         public void RefreshList()
         {
-            Store = new ListStore(typeof(int), typeof(string), typeof(string), typeof(string), typeof(string));
+            Store = new ListStore(typeof(int), typeof(string), typeof(string), typeof(string), typeof(string),
+                typeof(int), typeof(int), typeof(int), typeof(int));
 
             foreach (var kotoba in _kotobaService.List)
-                Store.AppendValues(kotoba.Id, kotoba.Namae, kotoba.Furigana, kotoba.Romaji, kotoba.Honyaku);
+                Store.AppendValues(kotoba.Id, kotoba.Namae, kotoba.Furigana, kotoba.Romaji, kotoba.Honyaku,
+                    kotoba.Seen, kotoba.Answer, kotoba.Wrong, kotoba.Ratio);
             
             _filter = new TreeModelFilter(Store, null) { VisibleFunc = FilterKanji };
             _sort = new TreeModelSort(_filter);
