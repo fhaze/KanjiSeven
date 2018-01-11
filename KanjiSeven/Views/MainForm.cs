@@ -20,7 +20,7 @@ namespace KanjiSeven.Views
         private readonly Button _configButton = new Button { Label = "設定" };
         private readonly Button _exitButton   = new Button { Label = "終了"};
         
-        public MainForm() : base("Kanji Seven")
+        public MainForm() : base("漢字七")
         {
             SetSizeRequest(511, 320);
             Resizable = false;
@@ -29,7 +29,8 @@ namespace KanjiSeven.Views
             _mainVButtonBox.Add(_kotobaButton);
             _mainVButtonBox.Add(_configButton);
             _mainVButtonBox.Add(_exitButton);
-            
+           
+            _table.Attach(new Label("漢字七").SetFontSize(50).SetForegroundColor(255, 255, 255), 0, 1, 0, 1);
             _table.Attach(_mainVButtonBox, 2, 3, 0, 1);
             _mainVerticalBox.PackStart(_table);
             _mainVerticalBox.PackStart(_statusbar, false, true, 0);

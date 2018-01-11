@@ -15,7 +15,7 @@ namespace KanjiSeven
                 StorageDir = "KanjiSeven.db3",
                 ShowHint = true,
                 HintSpeed = 3,
-                GameStyle = GameStyle.Simple
+                GameMode = GameMode.Simple
             }, true);
         }
 
@@ -34,10 +34,10 @@ namespace KanjiSeven
                         
                 conf.HintSpeed = Convert.ToInt32(data["Configuration"]["HintSpeed"]);
                 
-                if (Enum.TryParse<GameStyle>(data["Configuration"]["GameStyle"], out var gameStyle))
-                    conf.GameStyle = gameStyle;
+                if (Enum.TryParse<GameMode>(data["Configuration"]["GameStyle"], out var gameStyle))
+                    conf.GameMode = gameStyle;
                 else
-                    conf.GameStyle = GameStyle.Simple;
+                    conf.GameMode = GameMode.Simple;
 
                 return conf;
             }
@@ -54,7 +54,7 @@ namespace KanjiSeven
             data["Configuration"]["StorageDir"] = configuration.StorageDir;
             data["Configuration"]["ShowHint"] = configuration.ShowHint.ToString();
             data["Configuration"]["HintSpeed"] = configuration.HintSpeed.ToString();
-            data["Configuration"]["GameStyle"] = configuration.GameStyle.ToString();
+            data["Configuration"]["GameStyle"] = configuration.GameMode.ToString();
             
             file.WriteFile("KanjiSeven.ini", data);
         }

@@ -1,13 +1,10 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using Gdk;
 using Gtk;
+using KanjiSeven.Extensions;
 using KanjiSeven.Models;
 using KanjiSeven.Services;
 using KanjiSeven.Widgets;
-using Pango;
 using Window = Gtk.Window;
 
 namespace KanjiSeven.Views
@@ -16,25 +13,30 @@ namespace KanjiSeven.Views
     {
         private readonly VBox   _mainVerticalBox   = new VBox { BorderWidth = 10 };
         private readonly VBox   _helpVerticalBox   = new VBox { BorderWidth = 10 };
-        private readonly Label  _description       = new Label("ー");
+        private readonly HBox   _descriptionHBox   = new HBox { BorderWidth = 10 };
+        private readonly Label  _currentCardIndex  = new Label();
+        private readonly Label  _scoreDescription  = new Label();
         private readonly Label  _cardLabelKotoba   = new Label("｡ﾟﾟ(」｡≧□≦)」");
-        private readonly Label  _cardLabelFurigana = new Label("");
-        private readonly Label  _cardLabelRomaji   = new Label("");
-        private readonly Label  _cardLabelHonyaku  = new Label("");
+        private readonly Label  _cardLabelFurigana = new Label(string.Empty);
+        private readonly Label  _cardLabelRomaji   = new Label(string.Empty);
+        private readonly Label  _cardLabelHonyaku  = new Label(string.Empty);
         private readonly Button _startButton       = new Button { Label = "始めよ" };
         private readonly Button _backButton        = new Button { Label = "やめろ" }; 
         
         // 推測ゲーム
+        private readonly Gdk.Color    _defaultColor = new Gdk.Color(255, 255, 255);
+        private readonly Gdk.Color    _correctColor = new Gdk.Color(150, 255, 150);
+        private readonly Gdk.Color    _wrongColor = new Gdk.Color(255, 150, 150);
         private readonly HButtonBox   _guessTopBox = new HButtonBox { Layout = ButtonBoxStyle.Center, Spacing = 5};
         private readonly HButtonBox   _guessBottomBox = new HButtonBox { Layout = ButtonBoxStyle.Center, Spacing = 5 };
         private readonly List<Button> _guessButtonList = new List<Button>
         {
-            new Button { Label = "回答１" },
-            new Button { Label = "回答２" },
-            new Button { Label = "回答３" },
-            new Button { Label = "回答４" },
-            new Button { Label = "回答５" },
-            new Button { Label = "回答６" },
+            new Button(),
+            new Button(),
+            new Button(),
+            new Button(),
+            new Button(),
+            new Button(),
         };
 
         private readonly Configuration    _configuration = ConfigManager.Current;
@@ -47,14 +49,35 @@ namespace KanjiSeven.Views
             TransientFor = parent;
             SetPosition(WindowPosition.CenterOnParent);
 
-            var fontDescription = _cardLabelKotoba.PangoContext.FontDescription;
-            fontDescription.Size = Convert.ToInt32(80 * Pango.Scale.PangoScale);
-            _cardLabelKotoba.ModifyFont(fontDescription);
-            _mainVerticalBox.PackStart(_description, false, false, 0);
+            _descriptionHBox.PackStart(_currentCardIndex, false, false, 0);
+            
+            _cardLabelKotoba.SetFontSize(80);
+            _mainVerticalBox.PackStart(_descriptionHBox, false, true, 0);            
             _mainVerticalBox.PackStart(_cardLabelKotoba, true, true, 0);
 
-            if (_configuration.GameStyle == GameStyle.GuessMode)
+            if (_configuration.GameMode == GameMode.GuessMode)
             {
+                _descriptionHBox.PackStart(_scoreDescription);
+                
+                for (var i = 0; i < _guessButtonList.Count; i++)
+                {
+                    _guessButtonList[i].SetBackgroundColor(_defaultColor);
+                    _guessButtonList[i].Label = $"回答{i}";
+                    _guessButtonList[i].HeightRequest = 40;
+                    _guessButtonList[i].WidthRequest = 200;
+                    _guessButtonList[i].Sensitive = false;
+                    _guessButtonList[i].Clicked += (sender, args) =>
+                    {
+                        var btn = sender as Button;
+                        if (_flashCardService.GuessKotoba(btn.Label))
+                            btn.SetBackgroundColor(_correctColor);
+                        else
+                            btn.SetBackgroundColor(_wrongColor);
+                        
+                        Application.Invoke(delegate { UpdateDescription(); });
+                    };
+                }
+
                 _guessTopBox.PackStart(_guessButtonList[0], false, false, 10);
                 _guessTopBox.PackStart(_guessButtonList[1], false, false, 10);
                 _guessTopBox.PackStart(_guessButtonList[2], false, false, 10);
@@ -123,7 +146,7 @@ namespace KanjiSeven.Views
         {
             if (_flashCardService.NextFlashCard(out var card))
             {
-                _description.Text = $"{card.Number}/{_flashCardService.Count}";
+                _currentCardIndex.Text = $"質問：{card.Number} / {_flashCardService.CardCount}";
                 _cardLabelKotoba.Text = card.Kotoba.Namae;
                 _cardLabelFurigana.Text = card.Kotoba.Furigana;
                 _cardLabelRomaji.Text = card.Kotoba.Romaji;
@@ -133,19 +156,45 @@ namespace KanjiSeven.Views
                 _cardLabelRomaji.Visible = false;
                 _cardLabelHonyaku.Visible = false;
 
-                if (_configuration.GameStyle == GameStyle.GuessMode)
+                if (_configuration.GameMode == GameMode.GuessMode)
                 {
+                    UpdateDescription();
                     for (var i = 0; i < _flashCardService.GuessKotobaList.Count; i++)
+                    {
+                        _guessButtonList[i].SetBackgroundColor(_defaultColor);
+                        _guessButtonList[i].Sensitive = true;
                         _guessButtonList[i].Label = _flashCardService.GuessKotobaList[i].Honyaku;
+                    }
                 }
             }
-
-            if (_flashCardService.GameState == GameState.Result)
+            else
             {
+                _currentCardIndex.Text = string.Empty;
+                _cardLabelKotoba.Text = "終わり";
+                _cardLabelFurigana.Text = string.Empty;
+                _cardLabelRomaji.Text = string.Empty;
+                _cardLabelHonyaku.Text = string.Empty;
+                
                 _startButton.Clicked -= NextButtonOnClicked;
                 _startButton.Clicked += StartButtonOnClicked;
                 _startButton.Label = "始めよ";
+
+                if (_configuration.GameMode == GameMode.GuessMode)
+                {
+                    for (var i = 0; i < _guessButtonList.Count; i++)
+                    {
+                        _guessButtonList[i].Sensitive = false;
+                        _guessButtonList[i].Label = $"回答{i + 1}";
+                    }
+                }
             }
+        }
+
+        private void UpdateDescription()
+        {
+            _scoreDescription.Text = $"試行：{_flashCardService.TryNumber} " +
+                                     $"正解：{_flashCardService.CorrectNumber} " +
+                                     $"スキップ：{_flashCardService.SkipNumber}";
         }
     }
 }

@@ -2,7 +2,7 @@
 
 namespace KanjiSeven.Models
 {
-    public enum GameStyle
+    public enum GameMode
     {
         Simple,
         GuessMode,

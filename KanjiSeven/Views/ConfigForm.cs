@@ -55,23 +55,23 @@ namespace KanjiSeven.Views
             
             table.Attach(_hintScale, 1, 2, 2, 3, AttachOptions.Fill, AttachOptions.Fill, 0, 0);
             
-            _simpleRadio = new RadioButton(_simpleRadio, GameStyle.Simple.Label());
-            _guessRadio = new RadioButton(_simpleRadio, GameStyle.GuessMode.Label());
-            _inputRadio = new RadioButton(_simpleRadio, GameStyle.InputMode.Label());
+            _simpleRadio = new RadioButton(_simpleRadio, GameMode.Simple.Label());
+            _guessRadio = new RadioButton(_simpleRadio, GameMode.GuessMode.Label());
+            _inputRadio = new RadioButton(_simpleRadio, GameMode.InputMode.Label());
             
             _simpleRadio.Toggled += SimpleRadioOnToggled;
             _guessRadio.Toggled += SimpleRadioOnToggled;
             _inputRadio.Toggled += SimpleRadioOnToggled;
             
-            switch (_configuration.GameStyle)
+            switch (_configuration.GameMode)
             {
-                case GameStyle.Simple:
+                case GameMode.Simple:
                     _simpleRadio.Active = true;
                     break;
-                case GameStyle.GuessMode:
+                case GameMode.GuessMode:
                     _guessRadio.Active = true;
                     break;
-                case GameStyle.InputMode:
+                case GameMode.InputMode:
                     _inputRadio.Active = true;
                     break;
             }
@@ -109,12 +109,12 @@ namespace KanjiSeven.Views
         {
             var radio = sender as RadioButton;
 
-            if (radio?.Label == GameStyle.Simple.Label())
-                _configuration.GameStyle = GameStyle.Simple;
-            else if (radio?.Label == GameStyle.GuessMode.Label())
-                _configuration.GameStyle = GameStyle.GuessMode;
-            else if (radio?.Label == GameStyle.InputMode.Label())
-                _configuration.GameStyle = GameStyle.InputMode;
+            if (radio?.Label == GameMode.Simple.Label())
+                _configuration.GameMode = GameMode.Simple;
+            else if (radio?.Label == GameMode.GuessMode.Label())
+                _configuration.GameMode = GameMode.GuessMode;
+            else if (radio?.Label == GameMode.InputMode.Label())
+                _configuration.GameMode = GameMode.InputMode;
         }
 
         private void CancelButtonOnClicked(object sender, EventArgs eventArgs)

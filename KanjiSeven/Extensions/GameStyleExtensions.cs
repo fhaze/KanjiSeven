@@ -5,18 +5,18 @@ namespace KanjiSeven.Extensions
 {
     public static class GameStyleExtensions
     {
-        public static string Label(this GameStyle gameStyle)
+        public static string Label(this GameMode gameMode)
         {
-            switch (gameStyle)
+            switch (gameMode)
             {
-                case GameStyle.Simple:
+                case GameMode.Simple:
                     return "なじ";
-                case GameStyle.GuessMode:
+                case GameMode.GuessMode:
                     return "推測";
-                case GameStyle.InputMode:
+                case GameMode.InputMode:
                     return "入力";
                 default:
-                    throw new ArgumentOutOfRangeException(nameof(gameStyle), gameStyle, null);
+                    throw new ArgumentOutOfRangeException(nameof(gameMode), gameMode, null);
             }
         }
         

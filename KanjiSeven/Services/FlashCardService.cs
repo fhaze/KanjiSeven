@@ -17,32 +17,44 @@ namespace KanjiSeven.Services
         public const int               NumberOfCards = 6;
         
         public static FlashCardService Current { get; } = new FlashCardService();
-        public int                     Count     => _cardList.Count;
-        public GameState               GameState => _gameState;
+        public int                     CardCount     => _cardList.Count;
+        public int                     CorrectNumber => _correctNumber;
+        public int                     TryNumber     => _tryNumber;
+        public int                     SkipNumber    => _skipNumber;
+        public GameState               GameState     => _gameState;
         public List<Kotoba>            GuessKotobaList { get; private set; }
         
         public event EventHandler HintRequested;
         
-        private readonly KotobaService  _kotobaService;
-        private readonly IList<Kotoba>  _kotobaList;
+        private IList<Kotoba>           _kotobaList;
+        private KotobaService           _kotobaService;
         private GameState               _gameState;
-        private GameStyle               _gameStyle;
+        private GameMode                _gameMode;
         private List<FlashCard>         _cardList;
         private int                     _currentIndex;
+        private int                     _tryNumber;
+        private int                     _skipNumber;
+        private int                     _correctNumber;
+        private bool                    _currentGuessed;
+        private FlashCard               _currentCard;
         private Task                    _hintTask;
         private CancellationTokenSource _hintCts;
         
         private FlashCardService()
         {
-            _kotobaService = KotobaService.Current;
             _gameState     = GameState.NotReady;
-            _gameStyle     = ConfigManager.Current.GameStyle;
-            _kotobaList    = _kotobaService.List;
+            _gameMode      = ConfigManager.Current.GameMode;
         }
         
         public void Init()
         {
+            _kotobaService = KotobaService.Current;
+            _kotobaList    = _kotobaService.List;
             _currentIndex = 0;
+            _correctNumber = 0;
+            _tryNumber = 0;
+            _skipNumber = 0;
+            _currentCard = null;
             _cardList = new List<FlashCard>();
             _kotobaList.Shuffle();
             
@@ -57,16 +69,30 @@ namespace KanjiSeven.Services
             if (_gameState == GameState.NotReady || _gameState == GameState.Result)
                 throw new ServiceException("Invalid state");
 
+            if (_gameState != GameState.Ready && !_currentGuessed)
+                _skipNumber++;
+            
+            if (_currentIndex == _cardList.Count)
+            {
+                _gameState = GameState.Result;
+                card = null;
+                _currentCard = null;
+                return false;
+            }
+
+            _gameState = GameState.Playing;
             card = _cardList.ElementAt(_currentIndex++);
             card.Number = _currentIndex;
-
+            _currentCard = card;
+            _currentGuessed = false;
+            
             _hintCts?.Cancel();
             _hintCts = new CancellationTokenSource();
             
             if (ConfigManager.Current.ShowHint)
                 Task.Factory.StartNew(() => RequestHint(_hintCts.Token));
 
-            if (_gameStyle == GameStyle.GuessMode)
+            if (_gameMode == GameMode.GuessMode)
             {
                 var tmpKotobaList = new List<Kotoba>(_kotobaList);
                 tmpKotobaList.Shuffle();
@@ -80,13 +106,24 @@ namespace KanjiSeven.Services
 
                 GuessKotobaList = guessList;
             }
-            
-            if (_currentIndex == _cardList.Count)
-                _gameState = GameState.Result;
-            
-            return _currentIndex <= _cardList.Count;
+            return true;
         }
 
+        public bool GuessKotoba(string namae)
+        {
+            if (GameState != GameState.Playing)
+                throw new ServiceException("Invalid state");
+            
+            _tryNumber++;
+            if (namae == _currentCard.Kotoba.Honyaku)
+            {
+                _currentGuessed = true;
+                _correctNumber++;
+                return true;
+            }
+            return false;
+        }
+        
         private async Task RequestHint(CancellationToken ct)
         {
             await Task.Delay(TimeSpan.FromSeconds(ConfigManager.Current.HintSpeed), ct);
