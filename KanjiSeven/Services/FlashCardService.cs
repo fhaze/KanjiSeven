@@ -20,6 +20,7 @@ namespace KanjiSeven.Services
         public int                     CardCount     => _cardList.Count;
         public int                     CorrectNumber => _correctNumber;
         public int                     TryNumber     => _tryNumber;
+        public int                     WrongNumber   => _wrongNumber;
         public int                     SkipNumber    => _skipNumber;
         public GameState               GameState     => _gameState;
         public List<Kotoba>            GuessKotobaList { get; private set; }
@@ -34,6 +35,7 @@ namespace KanjiSeven.Services
         private int                     _currentIndex;
         private int                     _tryNumber;
         private int                     _skipNumber;
+        private int                     _wrongNumber;
         private int                     _correctNumber;
         private bool                    _currentGuessed;
         private bool                    _currentWrong;
@@ -53,6 +55,7 @@ namespace KanjiSeven.Services
             _kotobaList    = _kotobaService.List;
             _currentIndex = 0;
             _correctNumber = 0;
+            _wrongNumber = 0;
             _tryNumber = 0;
             _skipNumber = 0;
             _currentCard = null;
@@ -70,7 +73,7 @@ namespace KanjiSeven.Services
             if (_gameState == GameState.NotReady || _gameState == GameState.Result)
                 throw new ServiceException("Invalid state");
 
-            if (_gameState != GameState.Ready && !_currentGuessed)
+            if (_gameState != GameState.Ready && !_currentGuessed && _currentWrong)
                 _skipNumber++;
             
             if (_currentIndex == _cardList.Count)
@@ -130,6 +133,7 @@ namespace KanjiSeven.Services
             }
 
             _currentWrong = true;
+            _wrongNumber++;
             _kotobaService.Mark(_currentCard.Kotoba, Mark.Wrong);
             return false;
         }

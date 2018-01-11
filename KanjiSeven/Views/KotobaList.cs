@@ -66,7 +66,7 @@ namespace KanjiSeven.Views
             _kotobaView.AppendColumn("翻訳", new CellRendererText(), "text", 4);
             _kotobaView.AppendColumn("見た", new CellRendererText(), "text", 5);
             _kotobaView.AppendColumn("正解", new CellRendererText(), "text", 6);
-            _kotobaView.AppendColumn("間違った答え", new CellRendererText(), "text", 7);
+            _kotobaView.AppendColumn("間違", new CellRendererText(), "text", 7);
             _kotobaView.AppendColumn("正解率", new CellRendererText(), "text", 8);
 
             var i = 0;

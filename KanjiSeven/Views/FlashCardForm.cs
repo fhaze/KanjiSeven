@@ -192,8 +192,8 @@ namespace KanjiSeven.Views
 
         private void UpdateDescription()
         {
-            _scoreDescription.Text = $"試行：{_flashCardService.TryNumber} " +
-                                     $"正解：{_flashCardService.CorrectNumber} " +
+            _scoreDescription.Text = $"正解：{_flashCardService.CorrectNumber} " +
+                                     $"間違：{_flashCardService.WrongNumber} " +
                                      $"スキップ：{_flashCardService.SkipNumber}";
         }
     }
