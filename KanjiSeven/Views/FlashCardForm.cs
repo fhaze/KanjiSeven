@@ -20,7 +20,7 @@ namespace KanjiSeven.Views
         private readonly Label  _cardLabelFurigana = new Label(string.Empty);
         private readonly Label  _cardLabelRomaji   = new Label(string.Empty);
         private readonly Label  _cardLabelHonyaku  = new Label(string.Empty);
-        private readonly Button _startButton       = new Button { Label = "始めよ" };
+        private readonly Button _startButton       = new Button { Label = "スタート" };
         private readonly Button _backButton        = new Button { Label = "やめろ" }; 
         
         // 推測ゲーム
@@ -177,7 +177,7 @@ namespace KanjiSeven.Views
                 
                 _startButton.Clicked -= NextButtonOnClicked;
                 _startButton.Clicked += StartButtonOnClicked;
-                _startButton.Label = "始めよ";
+                _startButton.Label = "スタート";
 
                 if (_configuration.GameMode == GameMode.GuessMode)
                 {

@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Drawing;
+using System.Linq;
+using System.Reflection;
 using GLib;
 using Gtk;
 using KanjiSeven.Data;
@@ -15,14 +18,24 @@ namespace KanjiSeven.Views
         private readonly VButtonBox  _mainVButtonBox  = new VButtonBox
             { Layout = ButtonBoxStyle.Center, Spacing = 10 };
         
-        private readonly Button _startButton  = new Button { Label = "ゲーム"};
+        private readonly Button _startButton  = new Button { Label = "スタート"};
         private readonly Button _kotobaButton = new Button { Label = "言葉を登録" };
         private readonly Button _configButton = new Button { Label = "設定" };
         private readonly Button _exitButton   = new Button { Label = "終了"};
+        private readonly Bitmap _background;
+        private readonly string _version;
         
         public MainForm() : base("漢字七")
         {
-            SetSizeRequest(511, 320);
+            var version = Assembly.GetExecutingAssembly().GetName().Version.ToString().Split('.');
+            _version = $"{version[0]}.{version[1]}";
+            
+            _background = Resources.ResourceManager.GetObject("background") as Bitmap;
+            if (_background != null)
+                SetSizeRequest(_background.Width, _background.Height);
+            else
+                SetSizeRequest(520, 400);
+            
             Resizable = false;
             
             _mainVButtonBox.Add(_startButton);
@@ -30,7 +43,12 @@ namespace KanjiSeven.Views
             _mainVButtonBox.Add(_configButton);
             _mainVButtonBox.Add(_exitButton);
            
-            _table.Attach(new Label("漢字七").SetFontSize(50).SetForegroundColor(255, 255, 255), 0, 1, 0, 1);
+            var vbox = new VBox { Spacing = 10 };
+            vbox.PackStart(new Label() { HeightRequest = 120 }, false, true, 0);
+            vbox.PackStart(new Label("漢字七").SetFontSize(50).SetForegroundColor(255, 255, 255), false, false, 0);
+            vbox.PackStart(new Label($"version: {_version}").SetForegroundColor(255, 120, 120), false, false, 0);
+            
+            _table.Attach(vbox, 0, 1, 0, 1);
             _table.Attach(_mainVButtonBox, 2, 3, 0, 1);
             _mainVerticalBox.PackStart(_table);
             _mainVerticalBox.PackStart(_statusbar, false, true, 0);
@@ -50,8 +68,8 @@ namespace KanjiSeven.Views
         [ConnectBefore]
         private void OnExposeEvent(object sender, ExposeEventArgs args)
         {
-            var vbox = sender as VBox;
-            vbox.DrawResource(Resources.ResourceManager.GetObject("background"));
+            if (_background != null && sender is Widget w)
+                w.DrawResource(_background);
         }
 
         private void StartButtonOnClicked(object sender, EventArgs eventArgs)
