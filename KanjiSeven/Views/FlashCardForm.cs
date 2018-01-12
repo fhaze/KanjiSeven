@@ -24,19 +24,19 @@ namespace KanjiSeven.Views
         private readonly Button _backButton        = new Button { Label = "やめろ" }; 
         
         // 推測ゲーム
-        private readonly Gdk.Color    _defaultColor = new Gdk.Color(255, 255, 255);
-        private readonly Gdk.Color    _correctColor = new Gdk.Color(150, 255, 150);
-        private readonly Gdk.Color    _wrongColor = new Gdk.Color(255, 150, 150);
-        private readonly HButtonBox   _guessTopBox = new HButtonBox { Layout = ButtonBoxStyle.Center, Spacing = 5};
-        private readonly HButtonBox   _guessBottomBox = new HButtonBox { Layout = ButtonBoxStyle.Center, Spacing = 5 };
-        private readonly List<Button> _guessButtonList = new List<Button>
+        private readonly Gdk.Color      _defaultColor    = new Gdk.Color(255, 255, 255);
+        private readonly Gdk.Color      _correctColor    = new Gdk.Color(150, 255, 150);
+        private readonly Gdk.Color      _wrongColor      = new Gdk.Color(255, 150, 150);
+        private readonly HButtonBox     _guessTopBox     = new HButtonBox { Layout = ButtonBoxStyle.Center, Spacing = 5};
+        private readonly HButtonBox     _guessBottomBox  = new HButtonBox { Layout = ButtonBoxStyle.Center, Spacing = 5 };
+        private readonly List<FhButton> _guessButtonList = new List<FhButton>
         {
-            new Button(),
-            new Button(),
-            new Button(),
-            new Button(),
-            new Button(),
-            new Button(),
+            new FhButton(),
+            new FhButton(),
+            new FhButton(),
+            new FhButton(),
+            new FhButton(),
+            new FhButton(),
         };
 
         private readonly Configuration    _configuration = ConfigManager.Current;
@@ -45,7 +45,6 @@ namespace KanjiSeven.Views
         public FlashCardForm(Window parent) : base("ゲーム")
         {
             SetSizeRequest(900, 550);
-            Modal = true;
             TransientFor = parent;
             SetPosition(WindowPosition.CenterOnParent);
 
@@ -61,23 +60,28 @@ namespace KanjiSeven.Views
                 
                 for (var i = 0; i < _guessButtonList.Count; i++)
                 {
-                    _guessButtonList[i].SetBackgroundColor(_defaultColor);
+                    _guessButtonList[i].SetButtonColor(_defaultColor);
                     _guessButtonList[i].Label = $"回答{i}";
                     _guessButtonList[i].HeightRequest = 40;
                     _guessButtonList[i].WidthRequest = 200;
                     _guessButtonList[i].Sensitive = false;
                     _guessButtonList[i].Clicked += (sender, args) =>
                     {
-                        var btn = sender as Button;
-                        if (_flashCardService.GuessKotoba(btn.Label))
-                            btn.SetBackgroundColor(_correctColor);
-                        else
-                            btn.SetBackgroundColor(_wrongColor);
-                        
-                        Application.Invoke(delegate { UpdateDescription(); });
+                        if (sender is FhButton btn)
+                        {
+                            Application.Invoke(delegate
+                            {
+                                btn.SetButtonColor(_flashCardService.GuessKotoba(btn.Label)
+                                    ? _correctColor
+                                    : _wrongColor);
+                                UpdateDescription();
+                            });
+                        }
                     };
                 }
 
+                
+                
                 _guessTopBox.PackStart(_guessButtonList[0], false, false, 10);
                 _guessTopBox.PackStart(_guessButtonList[1], false, false, 10);
                 _guessTopBox.PackStart(_guessButtonList[2], false, false, 10);
@@ -161,7 +165,7 @@ namespace KanjiSeven.Views
                     UpdateDescription();
                     for (var i = 0; i < _flashCardService.GuessKotobaList.Count; i++)
                     {
-                        _guessButtonList[i].SetBackgroundColor(_defaultColor);
+                        _guessButtonList[i].SetButtonColor(_defaultColor);
                         _guessButtonList[i].Sensitive = true;
                         _guessButtonList[i].Label = _flashCardService.GuessKotobaList[i].Honyaku;
                     }

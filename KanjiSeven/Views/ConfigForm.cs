@@ -27,7 +27,6 @@ namespace KanjiSeven.Views
         
         public ConfigForm(Window parent) : base("設定")
         {
-            Modal = true;
             TransientFor = parent;
             SetPosition(WindowPosition.CenterOnParent);
 

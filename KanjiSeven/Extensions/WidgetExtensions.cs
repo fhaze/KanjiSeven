@@ -5,6 +5,7 @@ using System.IO;
 using Gdk;
 using Gtk;
 using GC = Gdk.GC;
+using Rectangle = Gdk.Rectangle;
 
 namespace KanjiSeven.Extensions
 {
@@ -18,13 +19,13 @@ namespace KanjiSeven.Extensions
                 {
                     bmp.Save(stream, ImageFormat.Png);
                     stream.Position = 0;
-                    widget.GdkWindow.DrawPixbuf(new GC(widget.GdkWindow), new Pixbuf(stream), 0, 0, 0, 0, bmp.Width,
-                        bmp.Height,
-                        RgbDither.None, 0, 0);
-                }
+                    var pixbuf = new Pixbuf(stream);
+                    pixbuf.RenderPixmapAndMask(out var pixmapReturn, out var maskReturn, 255);
+                    widget.Style.SetBgPixmap(StateType.Normal, pixmapReturn);
+                }                    
             }
         }
-
+        
         public static Widget SetFontSize(this Widget widget, int size)
         {
             var fontDescription = widget.PangoContext.FontDescription;

@@ -85,18 +85,24 @@
     <Compile Include="Resources.Designer.cs" />
     <Compile Include="Services\FlashCardService.cs" />
     <Compile Include="Services\KotobaService.cs" />
+    <Compile Include="Utils\PixbufUtil.cs" />
+    <Compile Include="Utils\SystemEnviroment.cs" />
     <Compile Include="Views\ConfigForm.cs" />
     <Compile Include="Views\FlashCardForm.cs" />
-    <Compile Include="Views\KotobaList.cs" />
-    <Compile Include="Views\KotobaEditor.cs" />
+    <Compile Include="Views\TangoList.cs" />
+    <Compile Include="Views\TangoEditor.cs" />
     <Compile Include="Views\MainForm.cs" />
     <Compile Include="Widgets\BaseWindow.cs" />
+    <Compile Include="Widgets\FhButton.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources.resx" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\pattern-bg.jpg" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\sui2.bmp" />

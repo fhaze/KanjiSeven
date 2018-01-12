@@ -9,13 +9,13 @@ using Window = Gtk.Window;
 
 namespace KanjiSeven.Views
 {
-    public class KotobaEditor : BaseWindow
+    public class TangoEditor : BaseWindow
     {
         private readonly VBox   _mainVerticalBox = new VBox { BorderWidth = 10};
         private readonly Entry  _idEntry         = new Entry{ WidthRequest = 50, IsEditable = false };
         private readonly Entry  _kotobaEntry     = new Entry();
         private readonly Entry  _furiganaEntry   = new Entry();
-        private readonly Entry  _romajiEntry    = new Entry();
+        private readonly Entry  _romajiEntry     = new Entry();
         private readonly Entry  _honyakuEntry    = new Entry();
         private readonly Button _confirmButton   = new Button {Label = "OK"};
         private readonly Button _closeButton     = new Button {Label = "閉じる" };
@@ -24,7 +24,7 @@ namespace KanjiSeven.Views
         private readonly KotobaService _kotobaService = KotobaService.Current;
         private readonly Kotoba        _kotoba;
 
-        public KotobaEditor(Window parent, int id) : this(parent)
+        public TangoEditor(Window parent, int id) : this(parent)
         {
             _kotoba = _kotobaService.Get(id);
             _idEntry.Text = _kotoba.Id.ToString();
@@ -34,7 +34,7 @@ namespace KanjiSeven.Views
             _honyakuEntry.Text = _kotoba.Honyaku;
         }
         
-        public KotobaEditor(Window parent) : base("言葉を編集")
+        public TangoEditor(Window parent) : base("単語の編集")
         {
             _parentWindow = parent;
             WidthRequest = 400;
@@ -50,7 +50,7 @@ namespace KanjiSeven.Views
             };
             table.Attach(new Label("ID")
                 { WidthRequest = 50, Xalign = 1 }, 0, 1, 0, 1, AttachOptions.Shrink, AttachOptions.Shrink, 0, 0);
-            table.Attach(new Label("言葉")
+            table.Attach(new Label("単語")
                 { WidthRequest = 50, Xalign = 1 }, 0, 1, 1, 2, AttachOptions.Shrink, AttachOptions.Shrink, 0, 0);
             table.Attach(new Label("ふりがな")
                 { WidthRequest = 50, Xalign = 1 }, 0, 1, 2, 3, AttachOptions.Shrink, AttachOptions.Shrink, 0, 0);
@@ -125,9 +125,9 @@ namespace KanjiSeven.Views
                 _kotobaService.Update(_kotoba);
             }
 
-            if (_parentWindow.GetType() == typeof(KotobaList))
+            if (_parentWindow.GetType() == typeof(TangoList))
             {
-                var list = _parentWindow as KotobaList;
+                var list = _parentWindow as TangoList;
                 list.RefreshList();
             }
             Destroy();

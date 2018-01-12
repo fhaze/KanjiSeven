@@ -14,7 +14,7 @@ using Window = Gtk.Window;
 
 namespace KanjiSeven.Views
 {
-    public class KotobaList : BaseWindow
+    public class TangoList : BaseWindow
     {
         private readonly KotobaService   _kotobaService      = KotobaService.Current;
         private readonly VBox            _mainVerticalBox    = new VBox();
@@ -22,18 +22,17 @@ namespace KanjiSeven.Views
         private readonly TreeView        _kotobaView         = new TreeView();
         private readonly Entry           _filterEntry        = new Entry { WidthRequest = 250 };
         private readonly Button          _cleanButton        = new Button { Label = "クリーン", WidthRequest = 80};
-        private readonly Button          _addKotobaButton    = new Button { Label = "新しい言葉"};
+        private readonly Button          _addKotobaButton    = new Button { Label = "新しい単語"};
         private readonly Button          _editKotobaButton   = new Button { Label = "編集"};
-        private readonly Button          _deleteKotobaButton = new Button { Label = "削除"};
+        private readonly FhButton        _deleteKotobaButton = new FhButton { Label = "削除"};
         private TreeModelFilter _filter;
         private TreeModelSort   _sort;
         
         private ListStore Store { set; get; }
 
-        public KotobaList(Window parent) : base("言葉を登録")
+        public TangoList(Window parent) : base("単語の登録")
         {
             SetSizeRequest(800, 600);
-            Modal = true;
             TransientFor = parent;
             SetPosition(WindowPosition.CenterOnParent);
 
@@ -54,13 +53,14 @@ namespace KanjiSeven.Views
             _addKotobaButton.Clicked += AddKotobaButtonOnClicked;
             _editKotobaButton.Clicked += EditKotobaButtonOnClicked;
             _deleteKotobaButton.Clicked += DeleteKotobaButtonOnClicked;
+            _deleteKotobaButton.SetButtonColor(255, 150, 150);
             hbox.PackStart(hbbox, false, false, 0);
             _mainVerticalBox.PackStart(hbox, false, true, 5);
 
             _kotobaView.Events = EventMask.ButtonPressMask;
             _kotobaView.ButtonPressEvent += KotobaViewOnButtonPressEvent;
             _kotobaView.AppendColumn("ID", new CellRendererText(), "text", 0);
-            _kotobaView.AppendColumn("言葉", new CellRendererText{ Scale = 1.5 }, "text", 1);
+            _kotobaView.AppendColumn("単語", new CellRendererText{ Scale = 1.5 }, "text", 1);
             _kotobaView.AppendColumn("ふりがな", new CellRendererText(), "text", 2);
             _kotobaView.AppendColumn("ローマ字", new CellRendererText(), "text", 3);
             _kotobaView.AppendColumn("翻訳", new CellRendererText(), "text", 4);
@@ -123,7 +123,7 @@ namespace KanjiSeven.Views
             var selection = _kotobaView.Selection;
 
             if (selection.GetSelected(out var model, out var iter))
-                new KotobaEditor(this, Convert.ToInt32(model.GetValue(iter, 0)));            
+                new TangoEditor(this, Convert.ToInt32(model.GetValue(iter, 0)));            
         }
 
         public void DeleteSelected()
@@ -169,7 +169,7 @@ namespace KanjiSeven.Views
         
         private void AddKotobaButtonOnClicked(object sender, EventArgs eventArgs)
         {
-            new KotobaEditor(this);
+            new TangoEditor(this);
         }
 
         private void FilterEntryOnChanged(object sender, EventArgs eventArgs)
