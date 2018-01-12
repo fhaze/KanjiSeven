@@ -23,12 +23,12 @@ namespace KanjiSeven.Services
         public int                     WrongNumber   => _wrongNumber;
         public int                     SkipNumber    => _skipNumber;
         public GameState               GameState     => _gameState;
-        public List<Kotoba>            GuessKotobaList { get; private set; }
+        public List<Tango>             GuessTangoList { get; private set; }
         
         public event EventHandler HintRequested;
         
-        private IList<Kotoba>           _kotobaList;
-        private KotobaService           _kotobaService;
+        private IList<Tango>            _tangoList;
+        private TangoService            _tangoService;
         private GameState               _gameState;
         private GameMode                _gameMode;
         private List<FlashCard>         _cardList;
@@ -51,8 +51,8 @@ namespace KanjiSeven.Services
         
         public void Init()
         {
-            _kotobaService = KotobaService.Current;
-            _kotobaList    = _kotobaService.List;
+            _tangoService = TangoService.Current;
+            _tangoList    = _tangoService.List;
             _currentIndex = 0;
             _correctNumber = 0;
             _wrongNumber = 0;
@@ -60,10 +60,10 @@ namespace KanjiSeven.Services
             _skipNumber = 0;
             _currentCard = null;
             _cardList = new List<FlashCard>();
-            _kotobaList.Shuffle();
+            _tangoList.Shuffle();
             
-            foreach (var kotoba in _kotobaList)
-                _cardList.Add(new FlashCard(kotoba));
+            foreach (var tango in _tangoList)
+                _cardList.Add(new FlashCard(tango));
 
             _gameState = GameState.Ready;
         }
@@ -73,7 +73,7 @@ namespace KanjiSeven.Services
             if (_gameState == GameState.NotReady || _gameState == GameState.Result)
                 throw new ServiceException("Invalid state");
 
-            if (_gameState != GameState.Ready && !_currentGuessed && _currentWrong)
+            if (_gameState != GameState.Ready && !_currentGuessed)
                 _skipNumber++;
             
             if (_currentIndex == _cardList.Count)
@@ -99,19 +99,19 @@ namespace KanjiSeven.Services
 
             if (_gameMode == GameMode.GuessMode)
             {
-                _kotobaService.Mark(_currentCard.Kotoba, Mark.Seen);
+                _tangoService.Mark(_currentCard.Tango, Mark.Seen);
                 
-                var tmpKotobaList = new List<Kotoba>(_kotobaList);
-                tmpKotobaList.Shuffle();
-                tmpKotobaList.Remove(card.Kotoba);
+                var tmpTangoList = new List<Tango>(_tangoList);
+                tmpTangoList.Shuffle();
+                tmpTangoList.Remove(card.Tango);
 
                 var correctIndex = new Random().Next(NumberOfCards);
-                var guessList = new List<Kotoba>();
+                var guessList = new List<Tango>();
 
                 for (var i = 0; i < NumberOfCards; i++)
-                    guessList.Add(i == correctIndex ? card.Kotoba : tmpKotobaList.ElementAt(i));
+                    guessList.Add(i == correctIndex ? card.Tango : tmpTangoList.ElementAt(i));
                 
-                GuessKotobaList = guessList;
+                GuessTangoList = guessList;
             }
             return true;
         }
@@ -122,11 +122,11 @@ namespace KanjiSeven.Services
                 throw new ServiceException("Invalid state");
             
             _tryNumber++;
-            if (namae == _currentCard.Kotoba.Honyaku)
+            if (namae == _currentCard.Tango.Honyaku)
             {
                 if (_currentWrong) return true;
                 
-                _kotobaService.Mark(_currentCard.Kotoba, Mark.Answer);
+                _tangoService.Mark(_currentCard.Tango, Mark.Answer);
                 _currentGuessed = true;
                 _correctNumber++;
                 return true;
@@ -134,14 +134,14 @@ namespace KanjiSeven.Services
 
             _currentWrong = true;
             _wrongNumber++;
-            _kotobaService.Mark(_currentCard.Kotoba, Mark.Wrong);
+            _tangoService.Mark(_currentCard.Tango, Mark.Wrong);
             return false;
         }
         
         private async Task RequestHint(CancellationToken ct)
         {
             await Task.Delay(TimeSpan.FromSeconds(ConfigManager.Current.HintSpeed), ct);
-            OnHintRequested(new HintRequestedEventArgs { Kotoba = _cardList.ElementAt(_currentIndex - 1).Kotoba });
+            OnHintRequested(new HintRequestedEventArgs { Tango = _cardList.ElementAt(_currentIndex - 1).Tango });
         }
         
         protected virtual void OnHintRequested(HintRequestedEventArgs e)

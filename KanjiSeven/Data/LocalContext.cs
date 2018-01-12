@@ -29,22 +29,22 @@ namespace KanjiSeven.Data
         
         public void CreateTables()
         {
-            Conn.CreateTable<Kotoba>();
+            Conn.CreateTable<Tango>();
 
-            if (Conn.Table<Kotoba>().Any()) return;
+            if (Conn.Table<Tango>().Any()) return;
 
             // bootstrap init
-            var kotobaList = new[]
+            var tangoList = new[]
             {
-                new Kotoba{ Namae = "水", Furigana = "みず", Romaji = "mizu", Honyaku = "water" },
-                new Kotoba{ Namae = "山", Furigana = "やま", Romaji = "yama", Honyaku = "mountain; hill" },
-                new Kotoba{ Namae = "火", Furigana = "ひ", Romaji = "hi", Honyaku = "fire; flame; blaze" },
-                new Kotoba{ Namae = "横断歩道", Furigana = "おうだんほどう", Romaji = "oudanhodou", Honyaku = "crosswalk" },
-                new Kotoba{ Namae = "中学生", Furigana = "ちゅうがくせい", Romaji = "chugakusei", Honyaku = "junior high school student; middle school pupil" },
-                new Kotoba{ Namae = "学生", Furigana = "がくせい", Romaji = "gakusei", Honyaku = "student" },
-                new Kotoba{ Namae = "学校", Furigana = "がっこう", Romaji = "gakkou", Honyaku = "school" }
+                new Tango{ Namae = "水", Furigana = "みず", Romaji = "mizu", Honyaku = "water" },
+                new Tango{ Namae = "山", Furigana = "やま", Romaji = "yama", Honyaku = "mountain; hill" },
+                new Tango{ Namae = "火", Furigana = "ひ", Romaji = "hi", Honyaku = "fire; flame; blaze" },
+                new Tango{ Namae = "横断歩道", Furigana = "おうだんほどう", Romaji = "oudanhodou", Honyaku = "crosswalk" },
+                new Tango{ Namae = "中学生", Furigana = "ちゅうがくせい", Romaji = "chugakusei", Honyaku = "junior high school student; middle school pupil" },
+                new Tango{ Namae = "学生", Furigana = "がくせい", Romaji = "gakusei", Honyaku = "student" },
+                new Tango{ Namae = "学校", Furigana = "がっこう", Romaji = "gakkou", Honyaku = "school" }
             };
-            Conn.InsertAll(kotobaList);
+            Conn.InsertAll(tangoList);
         }
     }
 }

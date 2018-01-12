@@ -5,6 +5,6 @@ namespace KanjiSeven.Events
 {
     public class HintRequestedEventArgs : EventArgs
     {
-        public Kotoba Kotoba { get; set; }
+        public Tango Tango { get; set; }
     }
 }

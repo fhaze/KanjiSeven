@@ -13,7 +13,7 @@ namespace KanjiSeven.Views
     {
         private readonly VBox   _mainVerticalBox = new VBox { BorderWidth = 10};
         private readonly Entry  _idEntry         = new Entry{ WidthRequest = 50, IsEditable = false };
-        private readonly Entry  _kotobaEntry     = new Entry();
+        private readonly Entry  _tangoEntry      = new Entry();
         private readonly Entry  _furiganaEntry   = new Entry();
         private readonly Entry  _romajiEntry     = new Entry();
         private readonly Entry  _honyakuEntry    = new Entry();
@@ -21,17 +21,17 @@ namespace KanjiSeven.Views
         private readonly Button _closeButton     = new Button {Label = "閉じる" };
 
         private readonly Window        _parentWindow;
-        private readonly KotobaService _kotobaService = KotobaService.Current;
-        private readonly Kotoba        _kotoba;
+        private readonly TangoService _tangoService = TangoService.Current;
+        private readonly Tango        _tango;
 
         public TangoEditor(Window parent, int id) : this(parent)
         {
-            _kotoba = _kotobaService.Get(id);
-            _idEntry.Text = _kotoba.Id.ToString();
-            _kotobaEntry.Text = _kotoba.Namae;
-            _furiganaEntry.Text = _kotoba.Furigana;
-            _romajiEntry.Text = _kotoba.Romaji;
-            _honyakuEntry.Text = _kotoba.Honyaku;
+            _tango = _tangoService.Get(id);
+            _idEntry.Text = _tango.Id.ToString();
+            _tangoEntry.Text = _tango.Namae;
+            _furiganaEntry.Text = _tango.Furigana;
+            _romajiEntry.Text = _tango.Romaji;
+            _honyakuEntry.Text = _tango.Honyaku;
         }
         
         public TangoEditor(Window parent) : base("単語の編集")
@@ -62,12 +62,12 @@ namespace KanjiSeven.Views
             var hbox = new HBox();
             hbox.PackStart(_idEntry, false, false, 0);
             table.Attach(hbox, 1, 2, 0, 1, AttachOptions.Fill, AttachOptions.Fill, 0, 0);
-            table.Attach(_kotobaEntry, 1, 2, 1, 2);
+            table.Attach(_tangoEntry, 1, 2, 1, 2);
             table.Attach(_furiganaEntry, 1, 2, 2, 3);
             table.Attach(_romajiEntry, 1, 2, 3, 4);
             table.Attach(_honyakuEntry, 1, 2, 4, 5);
 
-            _kotobaEntry.Changed += EntryOnChanged;
+            _tangoEntry.Changed += EntryOnChanged;
             _furiganaEntry.Changed += EntryOnChanged;
             _honyakuEntry.Changed += EntryOnChanged;
             
@@ -83,7 +83,7 @@ namespace KanjiSeven.Views
             _mainVerticalBox.PackStart(hbbox, false, false, 0);
             
             Add(_mainVerticalBox);
-            _kotobaEntry.GrabFocus();
+            _tangoEntry.GrabFocus();
             
             ShowAll();
             EntryOnChanged(null, null);
@@ -96,7 +96,7 @@ namespace KanjiSeven.Views
 
         private void EntryOnChanged(object sender, EventArgs eventArgs)
         {
-            if (string.IsNullOrEmpty(_kotobaEntry.Text.Trim()) ||
+            if (string.IsNullOrEmpty(_tangoEntry.Text.Trim()) ||
                 string.IsNullOrEmpty(_furiganaEntry.Text.Trim()) ||
                 string.IsNullOrEmpty(_romajiEntry.Text.Trim()) ||
                 string.IsNullOrEmpty(_honyakuEntry.Text.Trim()))
@@ -109,20 +109,20 @@ namespace KanjiSeven.Views
         private void ConfirmButtonOnClicked(object sender, EventArgs eventArgs)
         {
             if (string.IsNullOrEmpty(_idEntry.Text))
-                _kotobaService.Insert
+                _tangoService.Insert
                 (
-                    _kotobaEntry.Text.Trim(),
+                    _tangoEntry.Text.Trim(),
                     _furiganaEntry.Text.Trim(),
                     _romajiEntry.Text.Trim(),
                     _honyakuEntry.Text.Trim()
                 );
             else
             {
-                _kotoba.Namae = _kotobaEntry.Text.Trim();
-                _kotoba.Furigana = _furiganaEntry.Text.Trim();
-                _kotoba.Romaji = _romajiEntry.Text.Trim();
-                _kotoba.Honyaku = _honyakuEntry.Text.Trim();
-                _kotobaService.Update(_kotoba);
+                _tango.Namae = _tangoEntry.Text.Trim();
+                _tango.Furigana = _furiganaEntry.Text.Trim();
+                _tango.Romaji = _romajiEntry.Text.Trim();
+                _tango.Honyaku = _honyakuEntry.Text.Trim();
+                _tangoService.Update(_tango);
             }
 
             if (_parentWindow.GetType() == typeof(TangoList))

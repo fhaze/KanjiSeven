@@ -5,11 +5,11 @@ namespace KanjiSeven.Models
     public class FlashCard
     {
         public int Number { get; set; }
-        public Kotoba Kotoba { get; set; }
+        public Tango Tango { get; set; }
 
-        public FlashCard(Kotoba kotoba)
+        public FlashCard(Tango tango)
         {
-            Kotoba = kotoba;
+            Tango = tango;
         }
     }
 }

@@ -3,7 +3,7 @@ using SQLite;
 
 namespace KanjiSeven.Data.Entities
 {
-    public class Kotoba
+    public class Tango
     {
         [PrimaryKey, AutoIncrement]
         public int Id { get; set; }

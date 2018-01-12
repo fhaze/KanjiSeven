@@ -177,10 +177,10 @@ namespace KanjiSeven.Views
             if (_flashCardService.NextFlashCard(out var card))
             {
                 _currentCardIndex.Text = $"質問：{card.Number} / {_flashCardService.CardCount}";
-                _cardLabelTango.Text = card.Kotoba.Namae;
-                _cardLabelFurigana.Text = card.Kotoba.Furigana;
-                _cardLabelRomaji.Text = card.Kotoba.Romaji;
-                _cardLabelHonyaku.Text = card.Kotoba.Honyaku;
+                _cardLabelTango.Text = card.Tango.Namae;
+                _cardLabelFurigana.Text = card.Tango.Furigana;
+                _cardLabelRomaji.Text = card.Tango.Romaji;
+                _cardLabelHonyaku.Text = card.Tango.Honyaku;
 
                 _cardLabelFurigana.Visible = false;
                 _cardLabelRomaji.Visible = false;
@@ -189,11 +189,11 @@ namespace KanjiSeven.Views
                 if (_configuration.GameMode == GameMode.GuessMode)
                 {
                     UpdateDescription();
-                    for (var i = 0; i < _flashCardService.GuessKotobaList.Count; i++)
+                    for (var i = 0; i < _flashCardService.GuessTangoList.Count; i++)
                     {
                         _guessButtonList[i].SetButtonColor(_defaultColor);
                         _guessButtonList[i].Sensitive = true;
-                        _guessButtonList[i].Label = _flashCardService.GuessKotobaList[i].Honyaku;
+                        _guessButtonList[i].Label = _flashCardService.GuessTangoList[i].Honyaku;
                     }
                 }
             }

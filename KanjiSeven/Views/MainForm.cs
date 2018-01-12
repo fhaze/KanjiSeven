@@ -2,6 +2,7 @@
 using System.Drawing;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using Gdk;
 using GLib;
 using Gtk;
@@ -25,6 +26,7 @@ namespace KanjiSeven.Views
 
         private readonly AccelGroup _accelGroup = new AccelGroup();
         private readonly MenuBar    _menuBar = new MenuBar();
+        private readonly Toolbar    _toolbar = new Toolbar { ToolbarStyle = ToolbarStyle.Icons };
         
         private TangoList     _tangoList;
         private ConfigForm    _configForm;
@@ -74,7 +76,7 @@ namespace KanjiSeven.Views
             var tango = new MenuItem("単語(_T)") { Submenu = tangoMenu　};
             
             var registration = new MenuItem("登録…");
-            registration.Activated += OpenKotobaEditor;
+            registration.Activated += OpenTangoEditor;
             registration.AddAccelerator("activate", _accelGroup, new AccelKey(Key.r, ModifierType.ControlMask, AccelFlags.Visible));
             tangoMenu.Add(registration);
             
@@ -90,14 +92,33 @@ namespace KanjiSeven.Views
             helpMenu.Add(info);
             
             _menuBar.Append(help);
+            _mainVerticalBox.PackStart(_menuBar, false, false, 0);
+
+            var play = new ToolButton(Stock.MediaPlay);
+            play.Clicked += OpenFlashCardGame;
+            _toolbar.Insert(play, 0);
             
-            vbox.PackStart(_menuBar, false, false, 0);
+            var edit = new ToolButton(Stock.Edit);
+            edit.Clicked += OpenTangoEditor;
+            _toolbar.Insert(edit, 1);
+            
+            var preferences = new ToolButton(Stock.Preferences);
+            preferences.Clicked += OpenConfiguration;
+            _toolbar.Insert(preferences, 2);
+            
+            _toolbar.Insert(new SeparatorToolItem(), 3);
+            
+            var quit = new ToolButton(Stock.Quit);
+            quit.Clicked += Exit;
+            _toolbar.Insert(quit, 4);
+            
+            _mainVerticalBox.PackStart(_toolbar, false, true, 0);
+
             vbox.PackStart(new Label(), true, false, 0);
             vbox.PackStart(_logo, false, true, 0);
             vbox.PackStart(new Label("漢字七").SetFontSize(40).SetForegroundColor(0, 0, 0), false, false, 0);
             vbox.PackStart(new Label($"バージョン: {_version}").SetForegroundColor(255, 50, 50), false, false, 0);
             vbox.PackStart(new Label(), true, false, 0);
-            
 
             _mainVerticalBox.PackStart(vbox, true, true, 0);
             _mainVerticalBox.PackStart(_statusbar, false, true, 0);
@@ -129,7 +150,7 @@ namespace KanjiSeven.Views
                 _configForm = new ConfigForm(this);
         }
 
-        private void OpenKotobaEditor(object sender, EventArgs eventArgs)
+        private void OpenTangoEditor(object sender, EventArgs eventArgs)
         {
             if (_tangoList == null || !_tangoList.Visible)
                 _tangoList = new TangoList(this);
