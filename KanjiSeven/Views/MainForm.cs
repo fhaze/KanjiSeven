@@ -23,11 +23,13 @@ namespace KanjiSeven.Views
         private readonly Bitmap _background;
         private readonly string _version;
 
-        private readonly MenuBar _menuBar = new MenuBar();
+        private readonly AccelGroup _accelGroup = new AccelGroup();
+        private readonly MenuBar    _menuBar = new MenuBar();
         
-        private TangoList    _tangoList;
+        private TangoList     _tangoList;
         private ConfigForm    _configForm;
         private FlashCardForm _flashCardForm;
+        private AboutDialog   _aboutDialog;
         
         public MainForm() : base("漢字七")
         {
@@ -42,8 +44,7 @@ namespace KanjiSeven.Views
             if (PixbufUtil.TryFrom(Resources.ResourceManager.GetObject("logo"), out Pixbuf pixbuf))
                 _logo.Pixbuf = pixbuf;
             
-            var agr = new AccelGroup();
-            AddAccelGroup(agr);
+            AddAccelGroup(_accelGroup);
             
             //ファイル
             var fileMenu = new Menu();
@@ -51,19 +52,19 @@ namespace KanjiSeven.Views
 
             var game = new MenuItem("新しいゲーム…");
             game.Activated += OpenFlashCardGame;
-            game.AddAccelerator("activate", agr, new AccelKey(Key.n, ModifierType.ControlMask, AccelFlags.Visible));
+            game.AddAccelerator("activate", _accelGroup, new AccelKey(Key.n, ModifierType.ControlMask, AccelFlags.Visible));
             fileMenu.Add(game);
             
             var settings = new MenuItem("設定…");
             settings.Activated += OpenConfiguration;
-            settings.AddAccelerator("activate", agr, new AccelKey(Key.s, ModifierType.ControlMask | ModifierType.Mod1Mask, AccelFlags.Visible));
+            settings.AddAccelerator("activate", _accelGroup, new AccelKey(Key.s, ModifierType.ControlMask | ModifierType.Mod1Mask, AccelFlags.Visible));
             fileMenu.Add(settings);
             
             fileMenu.Add(new SeparatorMenuItem());
             
             var exit = new MenuItem("終了");
             exit.Activated += Exit;
-            exit.AddAccelerator("activate", agr, new AccelKey(Key.q, ModifierType.ControlMask, AccelFlags.Visible));
+            exit.AddAccelerator("activate", _accelGroup, new AccelKey(Key.q, ModifierType.ControlMask, AccelFlags.Visible));
             fileMenu.Add(exit);
 
             _menuBar.Append(file);
@@ -74,7 +75,7 @@ namespace KanjiSeven.Views
             
             var registration = new MenuItem("登録…");
             registration.Activated += OpenKotobaEditor;
-            registration.AddAccelerator("activate", agr, new AccelKey(Key.r, ModifierType.ControlMask, AccelFlags.Visible));
+            registration.AddAccelerator("activate", _accelGroup, new AccelKey(Key.r, ModifierType.ControlMask, AccelFlags.Visible));
             tangoMenu.Add(registration);
             
             _menuBar.Append(tango);
@@ -84,15 +85,18 @@ namespace KanjiSeven.Views
             var help = new MenuItem("ヘルプ(_H)") {　Submenu = helpMenu　};
             
             var info = new MenuItem("バージョン情報…");
-            info.AddAccelerator("activate", agr, new AccelKey(Key.F1, ModifierType.None, AccelFlags.Visible));
+            info.Activated += About;
+            info.AddAccelerator("activate", _accelGroup, new AccelKey(Key.F1, ModifierType.None, AccelFlags.Visible));
             helpMenu.Add(info);
             
             _menuBar.Append(help);
             
             vbox.PackStart(_menuBar, false, false, 0);
-            vbox.PackStart(_logo, false, true, 50);
+            vbox.PackStart(new Label(), true, false, 0);
+            vbox.PackStart(_logo, false, true, 0);
             vbox.PackStart(new Label("漢字七").SetFontSize(40).SetForegroundColor(0, 0, 0), false, false, 0);
-            vbox.PackStart(new Label($"version: {_version}").SetForegroundColor(255, 50, 50), false, false, 0);
+            vbox.PackStart(new Label($"バージョン: {_version}").SetForegroundColor(255, 50, 50), false, false, 0);
+            vbox.PackStart(new Label(), true, false, 0);
             
 
             _mainVerticalBox.PackStart(vbox, true, true, 0);
@@ -134,6 +138,24 @@ namespace KanjiSeven.Views
         private void Exit(object sender, EventArgs eventArgs)
         {
             Application.Quit();
+        }
+
+        private void About(object sender, EventArgs eventArgs)
+        {
+            if (_aboutDialog == null || !_aboutDialog.Visible)
+            {
+                var ab = new AboutDialog
+                {
+                    Website = "https://github.com/fhaze",
+                    ProgramName = "漢字七",
+                    Authors = new[] {"FHaze aka 松本エデル"},
+                    Version = _version
+                };
+                ab.Run();
+                ab.Destroy();
+
+                _aboutDialog = ab;
+            }
         }
         
         protected override void OnDestroyed()

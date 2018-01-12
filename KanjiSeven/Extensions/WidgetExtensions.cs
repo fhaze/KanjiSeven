@@ -26,12 +26,12 @@ namespace KanjiSeven.Extensions
             }
         }
         
-        public static Widget SetFontSize(this Widget widget, int size)
+        public static Label SetFontSize(this Label label, int size)
         {
-            var fontDescription = widget.PangoContext.FontDescription;
+            var fontDescription = label.PangoContext.FontDescription;
             fontDescription.Size = Convert.ToInt32(size * Pango.Scale.PangoScale);
-            widget.ModifyFont(fontDescription);
-            return widget;
+            label.ModifyFont(fontDescription);
+            return label;
         }
 
         public static Widget SetBackgroundColor(this Widget widget, StateType stateType, Gdk.Color color)

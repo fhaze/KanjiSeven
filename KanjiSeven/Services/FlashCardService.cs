@@ -116,7 +116,7 @@ namespace KanjiSeven.Services
             return true;
         }
 
-        public bool GuessKotoba(string namae)
+        public bool GuessTango(string namae)
         {
             if (GameState != GameState.Playing)
                 throw new ServiceException("Invalid state");
