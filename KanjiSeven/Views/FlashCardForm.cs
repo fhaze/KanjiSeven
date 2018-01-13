@@ -20,6 +20,7 @@ namespace KanjiSeven.Views
         private readonly Label  _currentCardIndex  = new Label();
         private readonly Label  _scoreDescription  = new Label();
         private readonly Label  _cardLabelTango    = new Label("｡ﾟﾟ(」｡≧□≦)」").SetFontSize(92);
+        private readonly Label  _cardLabelKanji    = new Label(string.Empty).SetFontSize(20);
         private readonly Label  _cardLabelFurigana = new Label(string.Empty).SetFontSize(20);
         private readonly Label  _cardLabelRomaji   = new Label(string.Empty);
         private readonly Label  _cardLabelHonyaku  = new Label(string.Empty);
@@ -29,19 +30,19 @@ namespace KanjiSeven.Views
         private readonly AccelGroup _accelGroup = new AccelGroup();
         
         // 推測ゲーム
-        private readonly Color          _defaultColor    = new Color(255, 255, 255);
-        private readonly Color          _correctColor    = new Color(150, 255, 150);
-        private readonly Color          _wrongColor      = new Color(255, 150, 150);
-        private readonly HButtonBox     _guessTopBox     = new HButtonBox { Layout = ButtonBoxStyle.Center, Spacing = 5};
-        private readonly HButtonBox     _guessBottomBox  = new HButtonBox { Layout = ButtonBoxStyle.Center, Spacing = 5 };
-        private readonly List<FhButton> _guessButtonList = new List<FhButton>
+        private readonly Color             _defaultColor    = new Color(255, 255, 255);
+        private readonly Color             _correctColor    = new Color(150, 255, 150);
+        private readonly Color             _wrongColor      = new Color(255, 150, 150);
+        private readonly HButtonBox        _guessTopBox     = new HButtonBox { Layout = ButtonBoxStyle.Center, Spacing = 5};
+        private readonly HButtonBox        _guessBottomBox  = new HButtonBox { Layout = ButtonBoxStyle.Center, Spacing = 5 };
+        private readonly List<TangoButton> _guessButtonList = new List<TangoButton>
         {
-            new FhButton(),
-            new FhButton(),
-            new FhButton(),
-            new FhButton(),
-            new FhButton(),
-            new FhButton(),
+            new TangoButton(),
+            new TangoButton(),
+            new TangoButton(),
+            new TangoButton(),
+            new TangoButton(),
+            new TangoButton(),
         };
 
         private readonly Configuration    _configuration = ConfigManager.Current;
@@ -60,6 +61,7 @@ namespace KanjiSeven.Views
             
             _frameVerticalBox.PackStart(new Label(), true, false, 0);
             _frameVerticalBox.PackStart(_cardLabelTango, false, false, 20);
+            _hintVerticalBox.PackStart(_cardLabelKanji, false, false, 0);
             _hintVerticalBox.PackStart(_cardLabelFurigana, false, false, 0);
             _hintVerticalBox.PackStart(_cardLabelRomaji, false, false, 0);
             _hintVerticalBox.PackStart(_cardLabelHonyaku, false, false, 0);
@@ -86,10 +88,16 @@ namespace KanjiSeven.Views
                 
                     for (var i = 0; i < _guessButtonList.Count; i++)
                     {
+                        if (_configuration.AnswerType == TangoType.Kanji ||
+                            _configuration.AnswerType == TangoType.Hiragana)
+                            _guessButtonList[i].SetFontSize(20);
+                        else
+                            _guessButtonList[i].SetFontSize(12);
+                        
                         _guessButtonList[i].SetButtonColor(_defaultColor);
                         _guessButtonList[i].Label = $"回答{i}";
-                        _guessButtonList[i].HeightRequest = 40;
-                        _guessButtonList[i].WidthRequest = 200;
+                        _guessButtonList[i].HeightRequest = 50;
+                        _guessButtonList[i].WidthRequest = 270;
                         _guessButtonList[i].Sensitive = false;
                         _guessButtonList[i].AddAccelerator("activate", _accelGroup,
                             new AccelKey(key[i], ModifierType.None, AccelFlags.Visible));
@@ -128,11 +136,11 @@ namespace KanjiSeven.Views
 
         private void OnClicked(object sender, EventArgs eventArgs)
         {
-            if (sender is FhButton btn)
+            if (sender is TangoButton btn)
             {
                 Application.Invoke(delegate
                 {   
-                    var correct = _flashCardService.GuessTango(btn.Label);
+                    var correct = _flashCardService.GuessTango(btn.Tango);
                     btn.SetButtonColor(correct ? _correctColor : _wrongColor);
                     btn.Sensitive = false;
 
@@ -177,11 +185,30 @@ namespace KanjiSeven.Views
             if (_flashCardService.NextFlashCard(out var card))
             {
                 _currentCardIndex.Text = $"質問：{card.Number} / {_flashCardService.CardCount}";
-                _cardLabelTango.Text = card.Tango.Namae;
+
+                switch (_configuration.QuestionType)
+                {
+                    case TangoType.Kanji:
+                        _cardLabelTango.Text = card.Tango.Namae;
+                        break;
+                    case TangoType.Hiragana:
+                        _cardLabelTango.Text = card.Tango.Furigana;
+                        break;
+                    case TangoType.Romaji:
+                        _cardLabelTango.Text = card.Tango.Romaji;
+                        _cardLabelTango.SetFontSize(38);
+                        break;
+                    case TangoType.Honyaku:
+                        _cardLabelTango.Text = card.Tango.Honyaku;
+                        _cardLabelTango.SetFontSize(38);
+                        break;
+                }
+                _cardLabelKanji.Text = card.Tango.Namae;
                 _cardLabelFurigana.Text = card.Tango.Furigana;
                 _cardLabelRomaji.Text = card.Tango.Romaji;
                 _cardLabelHonyaku.Text = card.Tango.Honyaku;
 
+                _cardLabelKanji.Visible = false;
                 _cardLabelFurigana.Visible = false;
                 _cardLabelRomaji.Visible = false;
                 _cardLabelHonyaku.Visible = false;
@@ -191,9 +218,25 @@ namespace KanjiSeven.Views
                     UpdateDescription();
                     for (var i = 0; i < _flashCardService.GuessTangoList.Count; i++)
                     {
+                        _guessButtonList[i].Tango = _flashCardService.GuessTangoList[i];
                         _guessButtonList[i].SetButtonColor(_defaultColor);
                         _guessButtonList[i].Sensitive = true;
-                        _guessButtonList[i].Label = _flashCardService.GuessTangoList[i].Honyaku;
+
+                        switch (_configuration.AnswerType)
+                        {
+                            case TangoType.Kanji:
+                                _guessButtonList[i].Label = _flashCardService.GuessTangoList[i].Namae;
+                                break;
+                            case TangoType.Hiragana:
+                                _guessButtonList[i].Label = _flashCardService.GuessTangoList[i].Furigana;
+                                break;
+                            case TangoType.Romaji:
+                                _guessButtonList[i].Label = _flashCardService.GuessTangoList[i].Romaji;
+                                break;
+                            case TangoType.Honyaku:
+                                _guessButtonList[i].Label = _flashCardService.GuessTangoList[i].Honyaku;
+                                break;
+                        }
                     }
                 }
             }
@@ -201,6 +244,7 @@ namespace KanjiSeven.Views
             {
                 _currentCardIndex.Text = string.Empty;
                 _cardLabelTango.Text = "終わり";
+                _cardLabelKanji.Text = string.Empty;
                 _cardLabelFurigana.Text = string.Empty;
                 _cardLabelRomaji.Text = string.Empty;
                 _cardLabelHonyaku.Text = string.Empty;
@@ -229,6 +273,7 @@ namespace KanjiSeven.Views
 
         private void ShowAnswer()
         {
+            _cardLabelKanji.Visible = true;
             _cardLabelFurigana.Visible = true;
             _cardLabelRomaji.Visible = true;
             _cardLabelHonyaku.Visible = true;

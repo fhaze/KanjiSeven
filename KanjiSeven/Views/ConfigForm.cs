@@ -5,6 +5,7 @@ using Gtk;
 using KanjiSeven.Data;
 using KanjiSeven.Extensions;
 using KanjiSeven.Models;
+using KanjiSeven.Utils;
 using KanjiSeven.Widgets;
 using Window = Gtk.Window;
 
@@ -21,6 +22,8 @@ namespace KanjiSeven.Views
         private readonly RadioButton _guessRadio;
         private readonly RadioButton _inputRadio;
         private readonly CheckButton _showHint          = new CheckButton { Label = "ヒントを見せて" };
+        private readonly ComboBox    _questionCombobox;
+        private readonly ComboBox    _answerCombobox;
         private readonly HScale      _hintScale         = new HScale(0, 20, 1);
 
         private readonly Configuration _configuration = ConfigManager.Current; 
@@ -30,10 +33,10 @@ namespace KanjiSeven.Views
             TransientFor = parent;
             SetPosition(WindowPosition.CenterOnParent);
 
-            var table = new Table(7, 2, false)
+            var table = new Table(4, 2, false)
             {
                 ColumnSpacing = 10,
-                RowSpacing = 2
+                RowSpacing = 10
             };
             table.Attach(new Label("DBファイラー")
                 { Xalign = 1, WidthRequest = 90 }, 0, 1, 0, 1, AttachOptions.Shrink, AttachOptions.Shrink, 0, 0);
@@ -56,7 +59,7 @@ namespace KanjiSeven.Views
             
             _simpleRadio = new RadioButton(_simpleRadio, GameMode.Simple.Label());
             _guessRadio = new RadioButton(_simpleRadio, GameMode.GuessMode.Label());
-            _inputRadio = new RadioButton(_simpleRadio, GameMode.InputMode.Label());
+            _inputRadio = new RadioButton(_simpleRadio, GameMode.InputMode.Label()) { Sensitive = false };
             
             _simpleRadio.Toggled += SimpleRadioOnToggled;
             _guessRadio.Toggled += SimpleRadioOnToggled;
@@ -74,11 +77,31 @@ namespace KanjiSeven.Views
                     _inputRadio.Active = true;
                     break;
             }
+            var t = new ComboBox();
             
-            table.Attach(_simpleRadio, 1, 2, 3, 4, AttachOptions.Fill, AttachOptions.Fill, 0, 0);
-            table.Attach(_guessRadio, 1, 2, 4, 5, AttachOptions.Fill, AttachOptions.Fill, 0, 0);
-            table.Attach(_inputRadio, 1, 2, 6, 7, AttachOptions.Fill, AttachOptions.Fill, 0, 0);
-
+            var gameModeHBox = new HBox(false, 20);
+            var gameModeVBox = new VBox();
+            gameModeVBox.PackStart(_simpleRadio, false, false, 0);
+            gameModeVBox.PackStart(_guessRadio, false, false, 0);
+            gameModeVBox.PackStart(_inputRadio, false, false, 0);
+            gameModeHBox.PackStart(gameModeVBox, false, false, 0);
+            
+            var gameModeVBox2 = new VBox();
+            _questionCombobox = new ComboBox(TangoTypeUtil.LabelList());
+            _questionCombobox.Active = _configuration.QuestionType.Index();
+            gameModeVBox2.PackStart(new Label("質問") { Xalign = 0 }, false, false, 0);
+            gameModeVBox2.PackStart(_questionCombobox, false, false, 0);
+            gameModeHBox.PackStart(gameModeVBox2, false, false, 0);
+            
+            var gameModeVBox3 = new VBox();
+            _answerCombobox = new ComboBox(TangoTypeUtil.LabelList());
+            _answerCombobox.Active = _configuration.AnswerType.Index();
+            gameModeVBox3.PackStart(new Label("回答") { Xalign = 0 }, false, false, 0);
+            gameModeVBox3.PackStart(_answerCombobox, false, false, 0);
+            gameModeHBox.PackStart(gameModeVBox3, false, false, 0);
+            
+            table.Attach(gameModeHBox, 1, 2, 3, 4, AttachOptions.Fill, AttachOptions.Fill, 0, 0);
+            
             _hintScale.Sensitive = _configuration.ShowHint;
             _hintScale.Value = _configuration.HintSpeed;            
             _mainVerticalBox.PackStart(table, false, false, 0);
@@ -123,6 +146,8 @@ namespace KanjiSeven.Views
 
         private void ConfirmButtonOnClicked(object sender, EventArgs eventArgs)
         {
+            _configuration.QuestionType = TangoTypeUtil.ByIndex(_questionCombobox.Active);
+            _configuration.AnswerType = TangoTypeUtil.ByIndex(_answerCombobox.Active);
             _configuration.StorageDir = _dbDirectoryEntry.Text.Trim();
             _configuration.HintSpeed = Convert.ToInt32(_hintScale.Value);
             

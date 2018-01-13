@@ -15,7 +15,9 @@ namespace KanjiSeven
                 StorageDir = "KanjiSeven.db3",
                 ShowHint = true,
                 HintSpeed = 10,
-                GameMode = GameMode.Simple
+                GameMode = GameMode.Simple,
+                QuestionType = TangoType.Kanji,
+                AnswerType = TangoType.Honyaku
             }, true);
         }
 
@@ -39,6 +41,16 @@ namespace KanjiSeven
                 else
                     conf.GameMode = GameMode.Simple;
 
+                if (Enum.TryParse<TangoType>(data["Configuration"]["QuestionType"], out var questionType))
+                    conf.QuestionType = questionType;
+                else
+                    conf.QuestionType = TangoType.Kanji;
+
+                if (Enum.TryParse<TangoType>(data["Configuration"]["AnswerType"], out var answerType))
+                    conf.AnswerType = answerType;
+                else
+                    conf.AnswerType = TangoType.Honyaku;
+                
                 return conf;
             }
         }
@@ -55,6 +67,8 @@ namespace KanjiSeven
             data["Configuration"]["ShowHint"] = configuration.ShowHint.ToString();
             data["Configuration"]["HintSpeed"] = configuration.HintSpeed.ToString();
             data["Configuration"]["GameStyle"] = configuration.GameMode.ToString();
+            data["Configuration"]["QuestionType"] = configuration.QuestionType.ToString();
+            data["Configuration"]["AnswerType"] = configuration.AnswerType.ToString();
             
             file.WriteFile("KanjiSeven.ini", data);
         }

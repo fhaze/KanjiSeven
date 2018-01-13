@@ -25,20 +25,28 @@ namespace KanjiSeven.Widgets
         }
         
 
-        public void SetButtonColor(Color color)
+        public FhButton SetButtonColor(Color color)
         {
             if (SystemEnviroment.IsUnix)
                 this.SetBackgroundColor(color);
             else
                 _eventBox.SetBackgroundColor(color);
+            return this;
         }
         
-        public void SetButtonColor(byte r, byte g, byte b)
+        public FhButton SetButtonColor(byte r, byte g, byte b)
         {
             if (SystemEnviroment.IsUnix)
                 this.SetBackgroundColor(r, g, b);
             else
                 _eventBox.SetBackgroundColor(r, g, b);
+            return this;
+        }
+
+        public FhButton SetFontSize(int size)
+        {
+            _label.SetFontSize(size);
+            return this;
         }
     }
 }

@@ -116,13 +116,13 @@ namespace KanjiSeven.Services
             return true;
         }
 
-        public bool GuessTango(string namae)
+        public bool GuessTango(Tango tango)
         {
             if (GameState != GameState.Playing)
                 throw new ServiceException("Invalid state");
             
             _tryNumber++;
-            if (namae == _currentCard.Tango.Honyaku)
+            if (tango.Honyaku == _currentCard.Tango.Honyaku)
             {
                 if (_currentWrong) return true;
                 
