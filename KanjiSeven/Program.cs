@@ -1,6 +1,7 @@
 ﻿using System;
 using Gtk;
 using IniParser;
+using KanjiSeven.Services;
 using KanjiSeven.Views;
 
 namespace KanjiSeven
@@ -10,7 +11,7 @@ namespace KanjiSeven
         public static void Main(string[] args)
         {
             Application.Init();
-            ConfigManager.Init();
+            ConfigurationService.Init();
             
             var mf = new MainForm();
             

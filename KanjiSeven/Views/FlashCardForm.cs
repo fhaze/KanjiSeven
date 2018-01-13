@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Gdk;
 using Gtk;
 using KanjiSeven.Extensions;
@@ -45,7 +46,7 @@ namespace KanjiSeven.Views
             new TangoButton(),
         };
 
-        private readonly Configuration    _configuration = ConfigManager.Current;
+        private readonly Configuration    _configuration = ConfigurationService.Current;
         private readonly FlashCardService _flashCardService = FlashCardService.Current;
         
         public FlashCardForm(Window parent) : base("ゲーム")
@@ -148,8 +149,15 @@ namespace KanjiSeven.Views
                     {
                         _guessButtonList.ForEach(gBtn => { gBtn.Sensitive = false; });
                         ShowAnswer();
+                        Task.Factory.StartNew(async () =>
+                        {
+                            if (_configuration.AutoMode)
+                            {
+                                await Task.Delay(TimeSpan.FromMilliseconds(_configuration.AutoModeSpeed));
+                                Application.Invoke(delegate { NextCard(); });
+                            }
+                        });
                     }
-
                     UpdateDescription();
                 });
             }
@@ -263,7 +271,7 @@ namespace KanjiSeven.Views
                 }
             }
         }
-
+        
         private void UpdateDescription()
         {
             _scoreDescription.Text = $"正解：{_flashCardService.CorrectNumber} " +

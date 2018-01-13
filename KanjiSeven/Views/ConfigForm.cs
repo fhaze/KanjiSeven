@@ -5,6 +5,7 @@ using Gtk;
 using KanjiSeven.Data;
 using KanjiSeven.Extensions;
 using KanjiSeven.Models;
+using KanjiSeven.Services;
 using KanjiSeven.Utils;
 using KanjiSeven.Widgets;
 using Window = Gtk.Window;
@@ -21,29 +22,33 @@ namespace KanjiSeven.Views
         private readonly RadioButton _simpleRadio;
         private readonly RadioButton _guessRadio;
         private readonly RadioButton _inputRadio;
-        private readonly CheckButton _showHint          = new CheckButton { Label = "ヒントを見せて" };
         private readonly ComboBox    _questionCombobox;
         private readonly ComboBox    _answerCombobox;
+        private readonly CheckButton _autoMode          = new CheckButton { Label = "オートモード" };
+        private readonly HScale      _autoModeScale     = new HScale(0, 5000, 100);
+        private readonly CheckButton _showHint          = new CheckButton { Label = "ヒントを見せて" };
         private readonly HScale      _hintScale         = new HScale(0, 20, 1);
 
-        private readonly Configuration _configuration = ConfigManager.Current; 
+        private readonly Configuration _configuration = ConfigurationService.Current; 
         
         public ConfigForm(Window parent) : base("設定")
         {
             TransientFor = parent;
             SetPosition(WindowPosition.CenterOnParent);
 
-            var table = new Table(4, 2, false)
+            var table = new Table(6, 2, false)
             {
                 ColumnSpacing = 10,
                 RowSpacing = 10
             };
             table.Attach(new Label("DBファイラー")
-                { Xalign = 1, WidthRequest = 90 }, 0, 1, 0, 1, AttachOptions.Shrink, AttachOptions.Shrink, 0, 0);
+                { Xalign = 1, WidthRequest = 130 }, 0, 1, 0, 1, AttachOptions.Shrink, AttachOptions.Shrink, 0, 0);
             table.Attach(new Label("ヒントスピード（秒）")
-                { Xalign = 1, WidthRequest = 90 }, 0, 1, 2, 3, AttachOptions.Shrink, AttachOptions.Shrink, 0, 0);
+                { Xalign = 1, WidthRequest = 130 }, 0, 1, 2, 3, AttachOptions.Shrink, AttachOptions.Shrink, 0, 0);
+            table.Attach(new Label("オートモードスピード（ミリ秒）")
+                { Xalign = 1, WidthRequest = 130 }, 0, 1, 4, 5, AttachOptions.Shrink, AttachOptions.Shrink, 0, 0);
             table.Attach(new Label("ゲームモード")
-                { Xalign = 1, WidthRequest = 90 }, 0, 1, 3, 7, AttachOptions.Shrink, AttachOptions.Shrink, 0, 0);
+                { Xalign = 1, WidthRequest = 130 }, 0, 1, 5, 6, AttachOptions.Shrink, AttachOptions.Shrink, 0, 0);
             
             var hbox = new HBox();
             hbox.PackStart(_dbDirectoryEntry, true, true, 0);
@@ -55,7 +60,17 @@ namespace KanjiSeven.Views
             _showHint.Active = _configuration.ShowHint;
             _showHint.Toggled += ShowHintOnToggled;
             
+            _hintScale.Sensitive = _configuration.ShowHint;
+            _hintScale.Value = _configuration.HintSpeed;        
             table.Attach(_hintScale, 1, 2, 2, 3, AttachOptions.Fill, AttachOptions.Fill, 0, 0);
+            
+            table.Attach(_autoMode, 1, 2, 3, 4, AttachOptions.Fill, AttachOptions.Fill, 0, 0);
+            _autoMode.Active = _configuration.AutoMode;
+            _autoMode.Toggled += AutoModeOnToggled;
+            
+            _autoModeScale.Sensitive = _configuration.AutoMode;
+            _autoModeScale.Value = _configuration.AutoModeSpeed;   
+            table.Attach(_autoModeScale, 1, 2, 4, 5, AttachOptions.Fill, AttachOptions.Fill, 0, 0);
             
             _simpleRadio = new RadioButton(_simpleRadio, GameMode.Simple.Label());
             _guessRadio = new RadioButton(_simpleRadio, GameMode.GuessMode.Label());
@@ -77,7 +92,6 @@ namespace KanjiSeven.Views
                     _inputRadio.Active = true;
                     break;
             }
-            var t = new ComboBox();
             
             var gameModeHBox = new HBox(false, 20);
             var gameModeVBox = new VBox();
@@ -100,22 +114,29 @@ namespace KanjiSeven.Views
             gameModeVBox3.PackStart(_answerCombobox, false, false, 0);
             gameModeHBox.PackStart(gameModeVBox3, false, false, 0);
             
-            table.Attach(gameModeHBox, 1, 2, 3, 4, AttachOptions.Fill, AttachOptions.Fill, 0, 0);
-            
-            _hintScale.Sensitive = _configuration.ShowHint;
-            _hintScale.Value = _configuration.HintSpeed;            
+            table.Attach(gameModeHBox, 1, 2, 5, 6, AttachOptions.Fill, AttachOptions.Fill, 0, 0);
+                
             _mainVerticalBox.PackStart(table, false, false, 0);
             _mainVerticalBox.PackStart(new HSeparator(), false, true, 5);
             
             var hbbox = new HButtonBox {Layout = ButtonBoxStyle.End, Spacing = 10};
             hbbox.PackStart(_confirmButton);
-            hbbox.PackStart(_cancelButton);
+            hbbox.PackStart(_cancelButton);;
             _confirmButton.Clicked += ConfirmButtonOnClicked;
             _cancelButton.Clicked += CancelButtonOnClicked;
             _mainVerticalBox.PackStart(hbbox);
             
             Add(_mainVerticalBox);
             ShowAll();
+        }
+
+        private void AutoModeOnToggled(object sender, EventArgs eventArgs)
+        {
+            if (sender is CheckButton check)
+            {
+                _autoModeScale.Sensitive = check.Active;
+                _configuration.AutoMode = check.Active;
+            }
         }
 
         private void ShowHintOnToggled(object sender, EventArgs eventArgs)
@@ -150,8 +171,9 @@ namespace KanjiSeven.Views
             _configuration.AnswerType = TangoTypeUtil.ByIndex(_answerCombobox.Active);
             _configuration.StorageDir = _dbDirectoryEntry.Text.Trim();
             _configuration.HintSpeed = Convert.ToInt32(_hintScale.Value);
+            _configuration.AutoModeSpeed = Convert.ToInt32(_autoModeScale.Value);
             
-            ConfigManager.Save(_configuration, false);
+            ConfigurationService.Save(_configuration, false);
             LocalContext.Current.Reload();
             Destroy();
         }

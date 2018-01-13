@@ -21,7 +21,7 @@ namespace KanjiSeven.Data.Entities
         {
             get
             {
-                var result = (float) Answer / (Seen + Wrong) * 100;
+                var result = (float) Answer / Seen * 100;
                 return result > 0 ? Convert.ToInt32(result) : 0;
             }
         }

@@ -46,7 +46,7 @@ namespace KanjiSeven.Services
         private FlashCardService()
         {
             _gameState     = GameState.NotReady;
-            _gameMode      = ConfigManager.Current.GameMode;
+            _gameMode      = ConfigurationService.Current.GameMode;
         }
         
         public void Init()
@@ -94,7 +94,7 @@ namespace KanjiSeven.Services
             _hintCts?.Cancel();
             _hintCts = new CancellationTokenSource();
             
-            if (ConfigManager.Current.ShowHint)
+            if (ConfigurationService.Current.ShowHint)
                 Task.Factory.StartNew(() => RequestHint(_hintCts.Token));
 
             if (_gameMode == GameMode.GuessMode)
@@ -140,7 +140,7 @@ namespace KanjiSeven.Services
         
         private async Task RequestHint(CancellationToken ct)
         {
-            await Task.Delay(TimeSpan.FromSeconds(ConfigManager.Current.HintSpeed), ct);
+            await Task.Delay(TimeSpan.FromSeconds(ConfigurationService.Current.HintSpeed), ct);
             OnHintRequested(new HintRequestedEventArgs { Tango = _cardList.ElementAt(_currentIndex - 1).Tango });
         }
         

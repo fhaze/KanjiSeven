@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using GLib;
 using KanjiSeven.Data.Entities;
+using KanjiSeven.Services;
 using SQLite;
 
 namespace KanjiSeven.Data
@@ -21,7 +22,7 @@ namespace KanjiSeven.Data
         {
             Conn?.Close();
 
-            var path = ConfigManager.Current.StorageDir;
+            var path = ConfigurationService.Current.StorageDir;
             Conn = new SQLiteConnection(path);
             
             CreateTables();
